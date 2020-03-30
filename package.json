@@ -8,6 +8,8 @@
   "author": "Mansehej <mansehej@gmail.com>",
   "private": true,
   "scripts": {
+    "start": "quasar dev",
+    "local": "quasar dev",
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
