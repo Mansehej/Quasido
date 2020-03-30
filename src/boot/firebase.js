@@ -6,7 +6,7 @@ const firebaseConfig=require('../../firebaseConfig.json')
 // Initialize Firebase
 let firebaseApp = firebase.initializeApp(firebaseConfig);
 let firebaseAuth = firebaseApp.auth()
-let firebaseDb = firebaseApp.database()
+let   firebaseDb = firebaseApp.firestore();
 
 //Enable analytics
 firebase.analytics();
