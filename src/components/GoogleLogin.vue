@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { firebaseAuth } from "../boot/firebase"
 import * as firebase from "firebase";
 
 export default {
