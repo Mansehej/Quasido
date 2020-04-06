@@ -5,8 +5,8 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('pages/Index.vue') },
-      { path: '/write', component: () => import('components/Writer.vue') }
-
+      { path: '/write', component: () => import('components/Writer.vue') },
+      { path: '/auth', component: () => import('pages/Auth.vue') }
     ]
   }
 ]
