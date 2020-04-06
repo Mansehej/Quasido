@@ -3,19 +3,22 @@
     <editor-menu-bar :editor="editor" v-slot="{ commands, isActive }">
       <div class="menubar">
         <div class="toolbar">
-          <button class="menubar__button" @click="commands.undo">Undo
+          <button class="menubar__button" @click="commands.undo">
+            Undo
             <!-- <icon name="undo" />Undo -->
           </button>
 
           <button class="menubar__button" @click="commands.redo">
             <!-- <icon name="redo" /> -->
-          Redo</button>
+            Redo
+          </button>
 
           <button
             class="menubar__button"
             :class="{ 'is-active': isActive.bold() }"
             @click="commands.bold"
-          >Bold
+          >
+            Bold
             <!-- <icon name="bold" /> -->
           </button>
 
@@ -23,7 +26,8 @@
             class="menubar__button"
             :class="{ 'is-active': isActive.italic() }"
             @click="commands.italic"
-          >Italic
+          >
+            Italic
             <!-- <icon name="italic" /> -->
           </button>
 
@@ -31,7 +35,8 @@
             class="menubar__button"
             :class="{ 'is-active': isActive.strike() }"
             @click="commands.strike"
-          >Strikethrough
+          >
+            Strikethrough
             <!-- <icon name="strike" /> -->
           </button>
 
@@ -39,7 +44,8 @@
             class="menubar__button"
             :class="{ 'is-active': isActive.underline() }"
             @click="commands.underline"
-          >Underline
+          >
+            Underline
             <!-- <icon name="underline" /> -->
           </button>
 
@@ -47,7 +53,8 @@
             class="menubar__button"
             :class="{ 'is-active': isActive.code() }"
             @click="commands.code"
-          >Code
+          >
+            Code
             <!-- <icon name="code" /> -->
           </button>
 
@@ -55,7 +62,8 @@
             class="menubar__button"
             :class="{ 'is-active': isActive.paragraph() }"
             @click="commands.paragraph"
-          >Paragraph
+          >
+            Paragraph
             <!-- <icon name="paragraph" /> -->
           </button>
 
@@ -81,7 +89,8 @@
             class="menubar__button"
             :class="{ 'is-active': isActive.bullet_list() }"
             @click="commands.bullet_list"
-          >Bullet list
+          >
+            Bullet list
             <!-- <icon name="ul" /> -->
           </button>
 
@@ -89,7 +98,8 @@
             class="menubar__button"
             :class="{ 'is-active': isActive.ordered_list() }"
             @click="commands.ordered_list"
-          >Ordered List
+          >
+            Ordered List
             <!-- <icon name="ol" /> -->
           </button>
 
@@ -97,7 +107,8 @@
             class="menubar__button"
             :class="{ 'is-active': isActive.blockquote() }"
             @click="commands.blockquote"
-          >Quote
+          >
+            Quote
             <!-- <icon name="quote" /> -->
           </button>
 
@@ -105,48 +116,50 @@
             class="menubar__button"
             :class="{ 'is-active': isActive.code_block() }"
             @click="commands.code_block"
-          >Code Block
+          >
+            Code Block
             <!-- <icon name="code" /> -->
           </button>
 
           <button
             class="menubar__button"
             @click="commands.createTable({rowsCount: 3, colsCount: 3, withHeaderRow: false })"
-          >Table
+          >
+            Table
             <!-- <icon name="table" /> -->
           </button>
 
           <span v-if="isActive.table()">
             <button class="menubar__button" @click="commands.deleteTable">
               <!-- <icon name="delete_table" /> -->
-			  Delete Table
+              Delete Table
             </button>
             <button class="menubar__button" @click="commands.addColumnBefore">
               <!-- <icon name="add_col_before" /> -->
-			  Add column before
+              Add column before
             </button>
             <button class="menubar__button" @click="commands.addColumnAfter">
               <!-- <icon name="add_col_after" /> -->
-			  Add column after
+              Add column after
             </button>
             <button class="menubar__button" @click="commands.deleteColumn">
-				Delete Column
+              Delete Column
               <!-- <icon name="delete_col" /> -->
             </button>
             <button class="menubar__button" @click="commands.addRowBefore">
-				Add row before
+              Add row before
               <!-- <icon name="add_row_before" /> -->
             </button>
             <button class="menubar__button" @click="commands.addRowAfter">
-				Add row after
+              Add row after
               <!-- <icon name="add_row_after" /> -->
             </button>
             <button class="menubar__button" @click="commands.deleteRow">
-				Delete row
+              Delete row
               <!-- <icon name="delete_row" /> -->
             </button>
             <button class="menubar__button" @click="commands.toggleCellMerge">
-				Combine row
+              Combine row
               <!-- <icon name="combine_cells" /> -->
             </button>
           </span>
@@ -195,6 +208,11 @@ export default {
   data() {
     return {
       editor: new Editor({
+        editorProps: {
+          handlePaste: () => {
+            return true
+          }
+        },
         extensions: [
           new Blockquote(),
           new BulletList(),
