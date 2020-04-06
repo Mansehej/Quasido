@@ -51,7 +51,7 @@ export default {
           }
         });
     },
-    signUp() {
+    register() {
       firebaseAuth
         .createUserWithEmailAndPassword(
           this.formData.email,
