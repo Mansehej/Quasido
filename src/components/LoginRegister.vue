@@ -1,8 +1,7 @@
 <template>
   <q-form @submit="submitForm">
     <q-input v-if="tab=='register'" class="q-mb-md" outlined v-model="formData.name" label="Name" />
-
-    <q-input class="q-mb-md" outlined v-model="formData.email" type="email" label="Email" />
+    <q-input class="q-mb-md" outlined v-model="formData.roll" type="text" label="Enrollment Number" />
     <q-input class="q-mb-md" outlined v-model="formData.password" type="password" label="Password" />
     <div class="text-negative text-center">{{formData.errorText}}</div>
     <br />
@@ -13,7 +12,9 @@
 </template>
 
 <script>
+
 import { firebaseAuth, firebaseDb } from "boot/firebase";
+
 
 export default {
   props: ["tab"],
@@ -21,7 +22,7 @@ export default {
     return {
       formData: {
         name: "",
-        email: "",
+        roll: "",
         username: "",
         password: "",
         errorText: ""
@@ -37,8 +38,11 @@ export default {
       }
     },
     login() {
+
+      // Get email of roll from database, and in .then do the following
+
       firebaseAuth
-        .signInWithEmailAndPassword(this.formData.email, this.formData.password)
+        .signInWithEmailAndPassword(doc().data.email, this.formData.password)
         .then(response => {
           console.log(response);
         })
@@ -50,22 +54,24 @@ export default {
             this.formData.errorText = "Incorrect password!";
           }
         });
-    },
-    register() {
-      firebaseAuth
-        .createUserWithEmailAndPassword(
-          this.formData.email,
-          this.formData.password
-        )
-        .then(response => {
-          response.user.updateProfile({
-            displayName: this.formData.name
-          });
-        })
-        .catch(error => {
-          this.formData.errorText = error.message;
-        });
     }
+
+    // register() {
+    //   firebaseAuth
+    //     .createUserWithEmailAndPassword(
+    //       this.formData.roll,
+    //       this.formData.password
+    //     )
+    //     .then(response => {
+    //       response.user.updateProfile({
+    //         displayName: this.formData.name
+    //       });
+    //     })
+    //     .catch(error => {
+    //       this.formData.errorText = error.message;
+    //     });
+    // }
+    
   }
 };
 </script>
