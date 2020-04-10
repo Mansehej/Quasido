@@ -1,7 +1,13 @@
 <template>
   <q-form @submit="submitForm">
     <q-input v-if="tab=='register'" class="q-mb-md" outlined v-model="formData.name" label="Name" />
-    <q-input class="q-mb-md" outlined v-model="formData.roll" type="text" label="Enrollment Number" />
+    <q-input
+      class="q-mb-md"
+      outlined
+      v-model="formData.roll"
+      type="text"
+      label="Enrollment Number"
+    />
     <q-input class="q-mb-md" outlined v-model="formData.password" type="password" label="Password" />
     <div class="text-negative text-center">{{formData.errorText}}</div>
     <br />
@@ -12,9 +18,12 @@
 </template>
 
 <script>
+let COLLEGE_NAME = "msit";
 
 import { firebaseAuth, firebaseDb } from "boot/firebase";
 
+import Store from "../store/store.js";
+let appStore = new Store("app");
 
 export default {
   props: ["tab"],
@@ -31,20 +40,41 @@ export default {
   },
   methods: {
     submitForm() {
-      if (this.tab == "login") {
+      // if (this.tab == "login") {
         this.login();
-      } else if (this.tab == "register") {
-        this.register();
-      }
+      // } else if (this.tab == "register") {
+      //   this.register();
+      // }
     },
-    login() {
+    async login() {
+      await firebaseDb
+        .collection(COLLEGE_NAME)
+        .doc("students")
+        .collection(this.formData.roll)
+        .doc("info")
+        .get()
+        .then(async doc => {
+          try {
+            this.authenticate(doc.data());
+          } catch (error) {
+            console.log(error);
+          }
+        })
+        .catch(err => {
+          this.errorText = err.message;
+        });
+    },
 
-      // Get email of roll from database, and in .then do the following
-
+    async authenticate(rollData) {
       firebaseAuth
-        .signInWithEmailAndPassword(doc().data.email, this.formData.password)
-        .then(response => {
-          console.log(response);
+        .signInWithEmailAndPassword(rollData.email, this.formData.password)
+        .then(async response => {
+          let user = response.user;
+          user.updateProfile({
+            displayName: rollData.name
+          });
+          await this.setAppStore(rollData, user);
+          console.log(await appStore.getKeyValuePair());
         })
         .catch(error => {
           console.log(error.code);
@@ -52,8 +82,19 @@ export default {
             this.formData.errorText = "User does not exist!";
           } else if (error.code == "auth/wrong-password") {
             this.formData.errorText = "Incorrect password!";
+          } else {
+            console.log(error);
           }
         });
+    },
+
+    async setAppStore(rollData, user) {
+      await appStore.setValue("signedInStatus", true);
+      await appStore.setValue("displayName", rollData.name);
+      await appStore.setValue("uid", user.uid);
+      await appStore.setValue("displayPicture", user.photoURL);
+      await appStore.setValue("studentDetails", rollData);
+      return true;
     }
 
     // register() {
