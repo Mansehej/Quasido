@@ -1,0 +1,1 @@
+- Catch in case of unidentified username ( assign till that collaction to a variable and check if undefined.)
