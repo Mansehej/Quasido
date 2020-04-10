@@ -87,6 +87,7 @@ export default {
     },
 
     async setAppStore(rollData, user) {
+      await appStore.setValue("username", this.formData.roll);
       await appStore.setValue("signedInStatus", true);
       await appStore.setValue("displayName", rollData.name);
       await appStore.setValue("uid", user.uid);
