@@ -31,7 +31,7 @@ export default {
         password: "",
         errorText: "",
         label: null,
-        docType: null
+        userType: null
       }
     };
   },
@@ -46,7 +46,7 @@ export default {
     async login() {
       await firebaseDb
         .collection(COLLEGE_NAME)
-        .doc(`${this.docType}`)
+        .doc(`${this.userType}`)
         .collection(this.formData.roll)
         .doc("info")
         .get()
@@ -72,7 +72,7 @@ export default {
           });
           await this.setAppStore(rollData, user);
           console.log(await appStore.getKeyValuePair());
-          this.$router.push(`/teacher/${this.formData.roll}`);
+          this.$router.push(`/${this.$props.type}/${this.formData.roll}`);
         })
         .catch(error => {
           console.log(error.code);
@@ -115,10 +115,10 @@ export default {
   created: function() {
     if (this.$props.type == "student") {
       this.label = "Enrollment Number";
-      this.docType = "students";
+      this.userType = "students";
     } else {
       this.label = "Username";
-      this.docType = "teachers";
+      this.userType = "teachers";
     }
   }
 };
