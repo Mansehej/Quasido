@@ -72,7 +72,9 @@ export default {
           });
           await this.setAppStore(rollData, user);
           console.log(await appStore.getKeyValuePair());
-          this.$router.push(`/${this.$props.type}/${this.formData.roll}`);
+          this.$router.push(
+            `/${this.$props.type.charAt(0)}/${this.formData.roll}`
+          );
         })
         .catch(error => {
           console.log(error.code);
