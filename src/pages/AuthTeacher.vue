@@ -17,11 +17,8 @@
       <q-tab-panel name="login">
         <login-register :tab="tab" :type="type" />
       </q-tab-panel>
-
-      <!-- <q-tab-panels v-model="tab" animated>
-       
-
-        <q-tab-panel name="register">
+      <!-- <q-tab-panels v-model="tab" animated> -->
+      <!-- <q-tab-panel name="register">
           <login-register :tab="tab" />
         </q-tab-panel>
       </q-tab-panels>-->
@@ -53,7 +50,7 @@ export default {
   data() {
     return {
       tab: "login",
-      type: "student"
+      type: "teacher"
     };
   },
   components: {
