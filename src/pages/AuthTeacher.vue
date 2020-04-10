@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center">
+  <q-page class="fullscreen row justify-center items-center">
     <!-- <q-img
       src="../assets/logo.svg"
       spinner-color="white"
@@ -14,11 +14,11 @@
 
       <q-separator inset />
 
-      <q-tab-panels v-model="tab" animated>
-        <q-tab-panel name="login">
-          <login-register :tab="tab" :type="userType" />
-        </q-tab-panel>
-        <q-tab-panel name="register">
+      <q-tab-panel name="login">
+        <login-register :tab="tab" :type="type" />
+      </q-tab-panel>
+      <!-- <q-tab-panels v-model="tab" animated> -->
+      <!-- <q-tab-panel name="register">
           <login-register :tab="tab" />
         </q-tab-panel>
       </q-tab-panels>-->
@@ -50,14 +50,8 @@ export default {
   data() {
     return {
       tab: "login",
-      type: "student"
+      type: "teacher"
     };
-  },
-  props: {
-    userType: {
-      type: String,
-      default: "student"
-    }
   },
   components: {
     "login-register": require("../components/LoginRegister.vue").default

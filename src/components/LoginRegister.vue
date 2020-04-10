@@ -1,13 +1,7 @@
 <template>
   <q-form @submit="submitForm">
     <q-input v-if="tab=='register'" class="q-mb-md" outlined v-model="formData.name" label="Name" />
-    <q-input
-      class="q-mb-md"
-      outlined
-      v-model="formData.roll"
-      type="text"
-      label="Enrollment Number"
-    />
+    <q-input class="q-mb-md" outlined v-model="formData.roll" type="text" :label="label" />
     <q-input class="q-mb-md" outlined v-model="formData.password" type="password" label="Password" />
     <div class="text-negative text-center">{{formData.errorText}}</div>
     <br />
@@ -26,7 +20,8 @@ import Store from "../store/store.js";
 let appStore = new Store("app");
 
 export default {
-  props: ["tab"],
+  props: ["tab", "type"],
+
   data() {
     return {
       formData: {
@@ -34,14 +29,16 @@ export default {
         roll: "",
         username: "",
         password: "",
-        errorText: ""
+        errorText: "",
+        label: null,
+        userType: null
       }
     };
   },
   methods: {
     submitForm() {
       // if (this.tab == "login") {
-        this.login();
+      this.login();
       // } else if (this.tab == "register") {
       //   this.register();
       // }
@@ -49,7 +46,7 @@ export default {
     async login() {
       await firebaseDb
         .collection(COLLEGE_NAME)
-        .doc("students")
+        .doc(`${this.userType}`)
         .collection(this.formData.roll)
         .doc("info")
         .get()
@@ -75,6 +72,9 @@ export default {
           });
           await this.setAppStore(rollData, user);
           console.log(await appStore.getKeyValuePair());
+          this.$router.push(
+            `/${this.$props.type.charAt(0)}/${this.formData.roll}`
+          );
         })
         .catch(error => {
           console.log(error.code);
@@ -89,6 +89,7 @@ export default {
     },
 
     async setAppStore(rollData, user) {
+      await appStore.setValue("username", this.formData.roll);
       await appStore.setValue("signedInStatus", true);
       await appStore.setValue("displayName", rollData.name);
       await appStore.setValue("uid", user.uid);
@@ -112,7 +113,15 @@ export default {
     //       this.formData.errorText = error.message;
     //     });
     // }
-    
+  },
+  created: function() {
+    if (this.$props.type == "student") {
+      this.label = "Enrollment Number";
+      this.userType = "students";
+    } else {
+      this.label = "Username";
+      this.userType = "teachers";
+    }
   }
 };
 </script>
