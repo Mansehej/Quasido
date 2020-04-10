@@ -1,4 +1,3 @@
-
 const routes = [
   {
     path: '/',
@@ -6,7 +5,8 @@ const routes = [
     children: [
       { path: '', component: () => import('pages/Index.vue') },
       { path: '/write', component: () => import('components/Writer.vue') },
-      { path: '/auth', component: () => import('pages/Auth.vue') }
+      { path: '/auth', component: () => import('pages/Auth.vue') },
+      { path: '/s/:username', component: () => import('pages/AssignmentList.vue') }
     ]
   }
 ]
