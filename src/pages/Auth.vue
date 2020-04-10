@@ -1,5 +1,5 @@
 <template>
-  <q-page class="fullscreen row justify-center items-center">
+  <q-page class="flex flex-center">
 
      <!-- <q-img
       src="../assets/logo.svg"
