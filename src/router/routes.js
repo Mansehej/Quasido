@@ -3,11 +3,14 @@ const routes = [
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
     children: [
-      { path: '', component: () => import('pages/Index.vue') },
-      { path: '/write', component: () => import('components/Writer.vue') },
-      { path: '/auth/:userType', component: () => import('pages/Auth.vue') },
-      { path: '/s/:username', component: () => import('pages/AssignmentList.vue') }
-
+      { path: "", component: () => import("pages/Index.vue") },
+      { path: "/write", component: () => import("components/Writer.vue") },
+      { path: "/auth/:userType", component: () => import("pages/Auth.vue") },
+      { path: "/auth", redirect: "/auth/student" },
+      {
+        path: "/s/:username",
+        component: () => import("pages/AssignmentList.vue")
+      }
     ]
   }
 ];
@@ -20,5 +23,4 @@ if (process.env.MODE !== "ssr") {
   });
 }
 
-export default routes
-
+export default routes;
