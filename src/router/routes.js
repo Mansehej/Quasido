@@ -13,7 +13,7 @@ const routes = [
       { path: "/auth", redirect: "/auth/student" },
       {
         path: "/:userType/:username",
-        component: () => import("pages/AssignmentList.vue"),
+        component: () => import("pages/StudentAssignments.vue"),
         props: true
       }
     ]
