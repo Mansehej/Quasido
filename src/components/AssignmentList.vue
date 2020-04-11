@@ -12,7 +12,7 @@
         clickable
         v-ripple
       >
-        <q-item-section @click="openassignment()">
+        <q-item-section @click="openAssignment(assignment.subject, assignment.id)">
           <q-item-label>{{ assignment.name }}</q-item-label>
           <q-item-label caption lines="1" class="text-capitalize">{{ assignment.subject}}</q-item-label>
           <q-item-label caption lines="1" class="text-secondary">
@@ -29,7 +29,25 @@
 export default {
   props: {
     userType: String,
-    assignments: Array
+    assignments: Array,
+    username: String
+  },
+  methods: {
+    openAssignment(subject, id) {
+      if (this.userType == "s") {
+        let dashedId = this.getDashedId(subject, id);
+        this.$router
+          .push("/s/" + this.username + "/" + dashedId)
+          .catch(err => {
+            console.log(err);
+          });
+      }
+    },
+    getDashedId(subject, id) {
+      let dashedSubject = subject.replace(/\s+/g, "-");
+      let dashedId = dashedSubject + "-" + id;
+      return dashedId;
+    }
   }
 };
 </script>
