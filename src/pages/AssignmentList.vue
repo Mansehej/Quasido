@@ -1,6 +1,11 @@
 <template>
   <q-page class="flex flex-center">
-    <assignment-list v-if="loaded==true" :assignments="assignments"/>
+    <assignment-list
+      v-if="loaded==true"
+      :assignments="assignments"
+      :userType="userTypeId"
+      :username="username"
+    />
   </q-page>
 </template>
 
@@ -12,7 +17,8 @@ import Store from "../store/store.js";
 let appStore = new Store("app");
 export default {
   props: {
-    username: String
+    username: String,
+    userType: String
   },
   components: {
     "assignment-list": require("../components/AssignmentList.vue").default
@@ -22,6 +28,7 @@ export default {
       prompt: false,
       loaded: false,
       assignments: [],
+      userTypeId: "",
       errorText: ""
     };
   },
@@ -33,16 +40,26 @@ export default {
   },
   methods: {
     async checkCorrectUser() {
+      this.setUserTypeId();
       let signedInUser = await appStore.getValue("username");
-      if(!signedInUser) {
+      if (!signedInUser) {
         this.$router.push("/auth").catch(err => {
           console.log(err);
         });
       }
       if (signedInUser != this.username) {
-        this.$router.push("/s/" + signedInUser).catch(err => {
-          console.log(err);
-        });
+        this.$router
+          .push("/" + this.userTypeId + "/" + signedInUser)
+          .catch(err => {
+            console.log(err);
+          });
+      }
+    },
+    setUserTypeId() {
+      if (this.userType == "teacher" || this.userType == "t") {
+        this.userTypeId = "t";
+      } else {
+        this.userTypeId = "s";
       }
     },
     async getAssignmentList() {
@@ -61,7 +78,6 @@ export default {
             let assignmentObj = assignment.data();
             assignmentObj["id"] = assignment.id;
             this.assignments.push(assignmentObj);
-            console.log(this.assignments);
           });
           this.loaded = true;
         })
