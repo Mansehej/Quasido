@@ -5,11 +5,16 @@ const routes = [
     children: [
       { path: "", component: () => import("pages/Index.vue") },
       { path: "/write", component: () => import("components/Writer.vue") },
-      { path: "/auth/:userType", component: () => import("pages/Auth.vue") },
+      {
+        path: "/auth/:userType",
+        component: () => import("pages/Auth.vue"),
+        props: true
+      },
       { path: "/auth", redirect: "/auth/student" },
       {
-        path: "/s/:username",
-        component: () => import("pages/AssignmentList.vue")
+        path: "/:userType/:username",
+        component: () => import("pages/AssignmentList.vue"),
+        props: true
       }
     ]
   }
