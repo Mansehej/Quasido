@@ -270,6 +270,11 @@ export default {
       })
     };
   },
+  methods: {
+    getContent() {
+      return this.editor.getJSON();
+    }
+  },
   beforeDestroy() {
     this.editor.destroy();
   }
