@@ -15,6 +15,11 @@ const routes = [
         path: "/:userType/:username",
         component: () => import("pages/StudentAssignments.vue"),
         props: true
+      },
+      {
+        path: "/:userType/:username/:assignmentId",
+        component: () => import("pages/StudentWriter.vue"),
+        props: true
       }
     ]
   }
