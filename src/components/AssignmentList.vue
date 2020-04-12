@@ -35,9 +35,9 @@ export default {
   methods: {
     openAssignment(subject, id) {
       if (this.userType == "s") {
-        let dashedId = this.getDashedId(subject, id);
+        // let dashedId = this.getDashedId(subject, id);
         this.$router
-          .push("/s/" + this.username + "/" + dashedId)
+          .push("/s/" + this.username + "/" + id)
           .catch(err => {
             console.log(err);
           });
