@@ -205,14 +205,21 @@ export default {
     EditorContent,
     EditorMenuBar
   },
+  props: {
+    enablePaste: Boolean
+  },
   data() {
+    let pasteProp = {};
+    if (!this.enablePaste) {
+      pasteProp = {
+        handlePaste: () => {
+          return true;
+        }
+      };
+    }
     return {
       editor: new Editor({
-        editorProps: {
-          handlePaste: () => {
-            return true
-          }
-        },
+        editorProps: pasteProp,
         extensions: [
           new Blockquote(),
           new BulletList(),
