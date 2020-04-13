@@ -1,8 +1,62 @@
 <template>
   <div>
-    <q-btn v-if="loaded==true" flat label="Save Assignment" @click="saveAssignment()" />
-    <q-btn v-if="loaded==true" flat label="Submit Assignment" @click="submitAssignment()" />
-    <writer-component v-if="loaded==true" ref="writer" :enablePaste="this.enablePaste" />
+    <br />
+    <h5 class="text-center text-red" v-if="isSubmitted">Assignment already submitted</h5>
+    <br />
+    <q-btn v-if="loaded && !isSubmitted" flat label="Save Assignment" @click="saveAssignment()" />
+    <q-btn
+      v-if="loaded && !isSubmitted"
+      flat
+      label="Submit Assignment"
+      @click="confirmSubmit = true"
+    />
+
+    <q-dialog v-model="confirmSubmit" persistent>
+      <q-card>
+        <q-card-section>
+          <div class="text-h6 text-negative">Confirm Submission</div>
+        </q-card-section>
+        <q-card-section class="row items-center">
+          <span class="q-ml-sm">You will not be able to make any more changes after submitting.</span>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn
+            flat
+            label="Submit Assignment"
+            color="negative"
+            v-close-popup
+            @click="submitAssignment()"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="pasteAlert">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6 text-warning">Warning</div>
+        </q-card-section>
+
+        <q-card-section
+          class="q-pt-none"
+        >Pasting in the editor is not allowed.</q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="OK" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <writer-component
+      v-if="loaded==true"
+      ref="writer"
+      :enablePaste="this.enablePaste"
+      :initialContent="this.initialContent"
+      :isReadOnly="this.isSubmitted"
+      @paste="pasteEvent()"
+    />
   </div>
 </template>
 
@@ -28,6 +82,10 @@ export default {
       loaded: false,
       userTypeId: "",
       enablePaste: false,
+      pasteAlert: false,
+      isSubmitted: false,
+      confirmSubmit: false,
+      initialContent: {},
       studentAssignmentStore: {},
       submitAssignmentStore: {}
     };
@@ -42,7 +100,11 @@ export default {
   async created() {
     await this.checkCorrectUser();
     await this.setStores();
-    this.loaded = true;
+    this.loadContentAndStatus();
+  },
+
+  async mounted() {
+    if (this.loaded == true) await this.loadContent();
   },
 
   methods: {
@@ -63,6 +125,10 @@ export default {
       }
     },
 
+    pasteEvent() {
+      this.pasteAlert = true
+    },
+
     setUserTypeIdAndPaste() {
       if (this.userType == "teacher" || this.userType == "t") {
         this.userTypeId = "t";
@@ -74,6 +140,52 @@ export default {
       return;
     },
 
+    loadContentAndStatus() {
+      let vm = this;
+      this.assignmentStore.get().then(function(doc) {
+        if (doc.exists) {
+          if (doc.data().status == "submitted") {
+            console.log("Is submitted");
+            vm.isSubmitted = true;
+          }
+          vm.initialContent = doc.data().content;
+        } else {
+          vm.initialContent = {
+            type: "doc",
+            content: [
+              {
+                type: "paragraph"
+              }
+            ]
+          };
+        }
+        vm.loaded = true;
+
+        console.log("loaded");
+      });
+    },
+
+    async loadContent() {
+      console.log("loading content");
+      this.clearEditorContent();
+      let content = this.assignmentStore.get().then(function(doc) {
+        if (doc.exists) {
+          this.setEditorContent(doc.data().content);
+          console.log("Setting " + doc.data().content);
+        } else {
+          this.setEditorContent("Hello");
+        }
+      });
+    },
+
+    clearEditorContent() {
+      this.setEditorContent("");
+    },
+
+    setEditorContent(content) {
+      this.$refs.writer.setContent(content);
+    },
+
     setStores() {
       this.studentAssignmentStore = firebaseDb
         .collection(COLLEGE_NAME)
@@ -82,58 +194,38 @@ export default {
         .doc("assignments")
         .collection(this.assignmentId);
 
-      this.submitAssignmentStore = firebaseDb
+      this.assignmentStore = firebaseDb
         .collection(COLLEGE_NAME)
         .doc("assignments")
         .collection(this.assignmentId)
-        .doc("submissions")
-        .collection(this.username);
+        .doc(this.username);
     },
 
     submitAssignment() {
-      this.submitAssignmentStore
-        .doc("content")
-        .set(this.getEditorContent())
-        .then(function() {
-          console.log("Document successfully submitted!");
-        })
-        .catch(function(error) {
-          console.error("Error writing document: ", error);
-        });
+      this.saveAssignment("submitted");
 
       this.studentAssignmentStore
-        .doc("status")
+        .doc("info")
         .set({
-          submitted: true,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         })
         .then(function() {
-          console.log("Set submitted status");
+          console.log("Document successfully saved!");
         })
         .catch(function(error) {
           console.error("Error writing document: ", error);
         });
     },
 
-    saveAssignment() {
-      this.studentAssignmentStore
-        .doc("content")
-        .set(this.getEditorContent())
-        .then(function() {
-          console.log("Document successfully saved!");
-        })
-        .catch(function(error) {
-          console.error("Error writing document: ", error);
-        });
-
-      this.studentAssignmentStore
-        .doc("status")
+    saveAssignment(status = "draft") {
+      this.assignmentStore
         .set({
-          submitted: false,
+          content: this.getEditorContent(),
+          status: status,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         })
         .then(function() {
-          console.log("Document successfully saved!");
+          console.log(status + " writing succesfull");
         })
         .catch(function(error) {
           console.error("Error writing document: ", error);
