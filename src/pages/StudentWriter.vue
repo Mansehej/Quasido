@@ -39,9 +39,7 @@
           <div class="text-h6 text-warning">Warning</div>
         </q-card-section>
 
-        <q-card-section
-          class="q-pt-none"
-        >Pasting in the editor is not allowed.</q-card-section>
+        <q-card-section class="q-pt-none">Pasting in the editor is not allowed.</q-card-section>
 
         <q-card-actions align="right">
           <q-btn flat label="OK" color="primary" v-close-popup />
@@ -87,7 +85,9 @@ export default {
       confirmSubmit: false,
       initialContent: {},
       studentAssignmentStore: {},
-      submitAssignmentStore: {}
+      submitAssignmentStore: {},
+      classroomAssignmentStore: {},
+      studentDetails: {}
     };
   },
 
@@ -122,11 +122,13 @@ export default {
           .catch(err => {
             console.log(err);
           });
+      } else {
+        this.studentDetails = await appStore.getValue("studentDetails");
       }
     },
 
     pasteEvent() {
-      this.pasteAlert = true
+      this.pasteAlert = true;
     },
 
     setUserTypeIdAndPaste() {
@@ -199,9 +201,19 @@ export default {
         .doc("assignments")
         .collection(this.assignmentId)
         .doc(this.username);
+
+      this.classroomAssignmentStore = firebaseDb
+        .collection(COLLEGE_NAME)
+        .doc("classrooms")
+        .collection(this.studentDetails.stream)
+        .doc(this.studentDetails.batch)
+        .collection("shift_" + this.studentDetails.shift)
+        .doc("semester_" + this.studentDetails.semester)
+        .collection("assignments")
+        .doc(this.assignmentId);
     },
 
-    submitAssignment() {
+    async submitAssignment() {
       this.saveAssignment("submitted");
 
       this.studentAssignmentStore
@@ -215,6 +227,10 @@ export default {
         .catch(function(error) {
           console.error("Error writing document: ", error);
         });
+
+      this.classroomAssignmentStore.update({
+        submissions: firebase.firestore.FieldValue.arrayUnion(this.username)
+      });
     },
 
     saveAssignment(status = "draft") {
