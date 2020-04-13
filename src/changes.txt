@@ -1,2 +1,4 @@
 - Catch in case of unidentified username ( assign till that collaction to a variable and check if undefined.)
 - Add checking of usertype on each page too (assign in localStorage)
+- Fix menu bar to float
+- Implement Loaders
