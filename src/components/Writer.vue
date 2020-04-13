@@ -1,6 +1,6 @@
 <template>
-  <div class="editor">
-    <editor-menu-bar :editor="editor" v-slot="{ commands, isActive }">
+  <div class="editor"> 
+    <editor-menu-bar v-if="!isReadOnly" :editor="editor" v-slot="{ commands, isActive }"  >
       <div class="menubar">
         <div class="toolbar">
           <button class="menubar__button" @click="commands.undo">
@@ -197,7 +197,8 @@ import {
   TableRow,
   Strike,
   Underline,
-  History
+  History,
+  Placeholder
 } from "tiptap-extensions";
 
 export default {
@@ -206,73 +207,62 @@ export default {
     EditorMenuBar
   },
   props: {
-    enablePaste: Boolean
+    enablePaste: Boolean,
+    isReadOnly: Boolean,
+    initialContent: Object
   },
   data() {
     let pasteProp = {};
     if (!this.enablePaste) {
       pasteProp = {
         handlePaste: () => {
+          this.onPasteEvent()
           return true;
         }
       };
     }
+    let extensionList = [
+      new Blockquote(),
+      new BulletList(),
+      new CodeBlock(),
+      new HardBreak(),
+      new Heading({ levels: [1, 2, 3] }),
+      new ListItem(),
+      new OrderedList(),
+      new TodoItem(),
+      new TodoList(),
+      new Link(),
+      new Bold(),
+      new Code(),
+      new Italic(),
+      new Strike(),
+      new Underline(),
+      new History(),
+      new Table({
+        resizable: true
+      }),
+      new TableHeader(),
+      new TableCell(),
+      new TableRow(),
+    ];
     return {
       editor: new Editor({
         editorProps: pasteProp,
-        extensions: [
-          new Blockquote(),
-          new BulletList(),
-          new CodeBlock(),
-          new HardBreak(),
-          new Heading({ levels: [1, 2, 3] }),
-          new ListItem(),
-          new OrderedList(),
-          new TodoItem(),
-          new TodoList(),
-          new Link(),
-          new Bold(),
-          new Code(),
-          new Italic(),
-          new Strike(),
-          new Underline(),
-          new History(),
-          new Table({
-            resizable: true
-          }),
-          new TableHeader(),
-          new TableCell(),
-          new TableRow()
-        ],
-        content: `
-            <h2>
-              Tables
-            </h2>
-            <p>
-              Tables come with some useful commands like adding, removing or merging rows and columns. Navigate with <code>tab</code> or arrow keys. Resizing is also supported.
-            </p>
-            <table>
-              <tr>
-                <th colspan="3" data-colwidth="100,0,0">Wide header</th>
-              </tr>
-              <tr>
-                <td>One</td>
-                <td>Two</td>
-                <td>Three</td>
-              </tr>
-              <tr>
-                <td>Four</td>
-                <td>Five</td>
-                <td>Six</td>
-              </tr>
-            </table>
-          `
+        extensions: extensionList,
+        editable: !this.isReadOnly,
+        content: this.initialContent
       })
     };
   },
   methods: {
     getContent() {
       return this.editor.getJSON();
+    },
+    setContent(content) {
+      this.editor.setContent(content);
+    },
+    onPasteEvent() {
+      this.$emit("paste", "Normal paste attempted");
     }
   },
   beforeDestroy() {
