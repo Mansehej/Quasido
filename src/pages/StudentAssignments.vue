@@ -76,6 +76,9 @@ export default {
         .then(async assignmentList => {
           assignmentList.forEach(assignment => {
             let assignmentObj = assignment.data();
+            if(assignmentObj.submissions.includes(this.username)) {
+              assignmentObj["submitted"] = true
+            }
             assignmentObj["id"] = assignment.id;
             this.assignments.push(assignmentObj);
           });

@@ -15,9 +15,12 @@
         <q-item-section @click="openAssignment(assignment.subject, assignment.id)">
           <q-item-label>{{ assignment.name }}</q-item-label>
           <q-item-label caption lines="1" class="text-capitalize">{{ assignment.subject}}</q-item-label>
-          <q-item-label caption lines="1" class="text-secondary">
+          <q-item-label v-if="!assignment.submitted" caption lines="1" class="text-secondary">
             Due date:
             {{assignment.due.toDate().toDateString()}}
+          </q-item-label>
+          <q-item-label v-if="assignment.submitted" caption lines="1" class="text-positive">
+            Submitted
           </q-item-label>
         </q-item-section>
       </q-item>
@@ -36,11 +39,9 @@ export default {
     openAssignment(subject, id) {
       if (this.userType == "s") {
         // let dashedId = this.getDashedId(subject, id);
-        this.$router
-          .push("/s/" + this.username + "/" + id)
-          .catch(err => {
-            console.log(err);
-          });
+        this.$router.push("/s/" + this.username + "/" + id).catch(err => {
+          console.log(err);
+        });
       }
     },
     getDashedId(subject, id) {
