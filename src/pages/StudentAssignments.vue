@@ -72,12 +72,13 @@ export default {
         .collection("shift_" + studentDetails.shift)
         .doc("semester_" + studentDetails.semester)
         .collection("assignments")
+        .orderBy("due")
         .get()
         .then(async assignmentList => {
           assignmentList.forEach(assignment => {
             let assignmentObj = assignment.data();
-            if(assignmentObj.submissions.includes(this.username)) {
-              assignmentObj["submitted"] = true
+            if (assignmentObj.submissions.includes(this.username)) {
+              assignmentObj["submitted"] = true;
             }
             assignmentObj["id"] = assignment.id;
             this.assignments.push(assignmentObj);
