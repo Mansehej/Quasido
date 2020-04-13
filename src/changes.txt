@@ -2,3 +2,4 @@
 - Add checking of usertype on each page too (assign in localStorage)
 - Fix menu bar to float
 - Implement Loaders
+- Send due date during teacher make assignment to db
