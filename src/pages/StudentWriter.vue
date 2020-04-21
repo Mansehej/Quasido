@@ -93,7 +93,6 @@ export default {
 
   props: {
     username: String,
-    userType: String,
     assignmentId: String
   },
 
@@ -132,13 +131,8 @@ export default {
     },
 
     setUserTypeIdAndPaste() {
-      if (this.userType == "teacher" || this.userType == "t") {
-        this.userTypeId = "t";
-        this.enablePaste = true;
-      } else {
-        this.userTypeId = "s";
-        this.enablePaste = false;
-      }
+      this.userTypeId = "s";
+      this.enablePaste = false;
       return;
     },
 
