@@ -3,7 +3,7 @@
     <br />
     <h5 class="text-center text-red" v-if="isSubmitted">Assignment already submitted</h5>
     <br />
-     <writer-component
+    <writer-component
       v-if="loaded==true"
       ref="writer"
       :enablePaste="false"
@@ -60,7 +60,9 @@
       :enablePaste="this.enablePaste"
       :initialContent="this.initialContent"
       :isReadOnly="this.isSubmitted"
+      :enableCheatDetection="true"
       @paste="pasteEvent()"
+      @cheated="cheatEvent()"
     />
   </div>
 </template>
@@ -139,11 +141,21 @@ export default {
       this.pasteAlert = true;
     },
 
+    cheatEvent() {
+      this.assignmentStore
+        .update({
+          cheated: true
+        })
+        .then(function() {
+          console.log(status + " writing succesfull");
+        });
+    },
+
     loadQuestion() {
-      let vm=this
+      let vm = this;
       this.classroomAssignmentStore.get().then(assignment => {
-        vm.assignmentQuestion = assignment.data().content
-      })
+        vm.assignmentQuestion = assignment.data().content;
+      });
     },
 
     setUserTypeIdAndPaste() {
@@ -244,8 +256,9 @@ export default {
     },
 
     saveAssignment(status = "draft") {
+      let vm = this;
       this.assignmentStore
-        .set({
+        .update({
           content: this.getEditorContent(),
           status: status,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -253,8 +266,19 @@ export default {
         .then(function() {
           console.log(status + " writing succesfull");
         })
-        .catch(function(error) {
-          console.error("Error writing document: ", error);
+        .catch(error => {
+          this.assignmentStore
+            .set({
+              content: vm.getEditorContent(),
+              status: status,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(function() {
+              console.log(status + " writing succesfull");
+            })
+            .catch(function(error) {
+              console.error("Error writing document: ", error);
+            });
         });
     },
 
