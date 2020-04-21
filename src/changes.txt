@@ -6,4 +6,5 @@
 - Database normalize
 - Security rules of database
 - Switching to teacher ui button
-- 
+- Upload of pdf
+- Inline images in editor
