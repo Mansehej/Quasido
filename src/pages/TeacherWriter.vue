@@ -5,7 +5,13 @@
       class="text-center text-red"
       v-if="isSubmitted && userTypeId=='s'"
     >Assignment already submitted</h5>
-    <q-btn class = "flex flex-top" v-if="loaded && isSubmitted && userTypeId=='t'" filled label="View Submissions" @click="viewSubmissions()" />
+    <q-btn
+      class="flex flex-top"
+      v-if="loaded && isSubmitted && userTypeId=='t'"
+      filled
+      label="View Submissions"
+      @click="viewSubmissions()"
+    />
     <br />
     <q-btn v-if="loaded && !isSubmitted" flat label="Save Assignment" @click="saveAssignment()" />
     <q-btn
@@ -152,6 +158,14 @@ export default {
       this.userTypeId = "t";
       this.enablePaste = true;
       return;
+    },
+
+    viewSubmissions() {
+      this.$router
+        .push("/t/" + this.username + "/" + this.assignmentId + "/submissions")
+        .catch(err => {
+          console.log(err);
+        });
     },
 
     loadContentAndStatus() {

@@ -30,6 +30,11 @@ const routes = [
         path: "/t/:username/:assignmentId",
         component: () => import("pages/TeacherWriter.vue"),
         props: true
+      },
+      {
+        path: "/t/:username/:assignmentId/submissions",
+        component: () => import("pages/SubmissionList.vue"),
+        props: true
       }
     ]
   }
