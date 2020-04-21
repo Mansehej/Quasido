@@ -22,8 +22,13 @@ const routes = [
         props: true
       },
       {
-        path: "/:userType/:username/:assignmentId",
+        path: "/s/:username/:assignmentId",
         component: () => import("pages/StudentWriter.vue"),
+        props: true
+      },
+      {
+        path: "/t/:username/:assignmentId",
+        component: () => import("pages/TeacherWriter.vue"),
         props: true
       }
     ]
