@@ -123,7 +123,7 @@ export default {
             console.log(err);
           });
       } else {
-        this.studentDetails = await appStore.getValue("studentDetails");
+        this.studentDetails = await appStore.getValue("userDetails");
       }
     },
 

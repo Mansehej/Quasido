@@ -94,7 +94,7 @@ export default {
       await appStore.setValue("displayName", rollData.name);
       await appStore.setValue("uid", user.uid);
       await appStore.setValue("displayPicture", user.photoURL);
-      await appStore.setValue("studentDetails", rollData);
+      await appStore.setValue("userDetails", rollData);
       return true;
     }
 

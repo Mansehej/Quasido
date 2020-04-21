@@ -25,7 +25,7 @@ export default {
   },
   data() {
     return {
-      prompt: false,
+      assigmentPrompt: false,
       loaded: false,
       assignments: [],
       userTypeId: "",
@@ -34,6 +34,7 @@ export default {
   },
   async mounted() {
     // Check if the user is accessing his/her own page
+    this.$q.loading.show();
     await this.checkCorrectUser();
     // Initialise store and get list of all scripts
     await this.getAssignmentList();
@@ -63,7 +64,7 @@ export default {
       }
     },
     async getAssignmentList() {
-      let studentDetails = await appStore.getValue("studentDetails");
+      let studentDetails = await appStore.getValue("userDetails");
       await firebaseDb
         .collection(COLLEGE_NAME)
         .doc("classrooms")
@@ -84,6 +85,7 @@ export default {
             this.assignments.push(assignmentObj);
           });
           this.loaded = true;
+          this.$q.loading.hide();
         })
         .catch(err => {
           this.errorText = err.message;
