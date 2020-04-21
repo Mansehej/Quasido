@@ -8,9 +8,13 @@
         clickable
         v-ripple
       >
-        <q-item-section @click="openAssignment()">
+        <q-item-section @click="openAssignment(submission.student)">
           <q-item-label>{{ submission.student }}</q-item-label>
-          <q-item-label caption lines="1" class="text-capitalize">Submission date: {{ submission.date.toDate().toDateString()}}</q-item-label>
+          <q-item-label
+            caption
+            lines="1"
+            class="text-capitalize"
+          >Submission date: {{ submission.date.toDate().toDateString()}}</q-item-label>
         </q-item-section>
       </q-item>
     </q-list>
@@ -24,25 +28,25 @@ import Store from "../store/store.js";
 import { firebaseDb } from "boot/firebase";
 import * as firebase from "firebase";
 
-
 let appStore = new Store("app");
 
 export default {
   props: {
-    assignmentId: Array,
+    assignmentId: String,
     username: String
   },
   data() {
     return {
-      submissionList : []
+      submissionList: []
     };
   },
-  async mounted() {    await this.checkCorrectUser();
+  async mounted() {
+    await this.checkCorrectUser();
     this.userTypeId = "t";
     await this.getSubmissionList();
   },
   methods: {
-     async checkCorrectUser() {
+    async checkCorrectUser() {
       let signedInUser = await appStore.getValue("username");
       if (!signedInUser) {
         this.$router.push("/auth").catch(err => {
@@ -58,24 +62,28 @@ export default {
       }
     },
     getSubmissionList() {
-      let vm = this
+      let vm = this;
       firebaseDb
-      .collection(COLLEGE_NAME)
-      .doc("assignments")
-      .collection(this.assignmentId)
-      .get()
-      .then(submissionList => {
-        submissionList.forEach(submission => {
-          vm.submissionList.push({
-            student: submission.id,
-            date: submission.data().timestamp
-          })
-        })
-      })
+        .collection(COLLEGE_NAME)
+        .doc("assignments")
+        .collection(this.assignmentId)
+        .get()
+        .then(submissionList => {
+          submissionList.forEach(submission => {
+            vm.submissionList.push({
+              student: submission.id,
+              date: submission.data().timestamp
+            });
+          });
+        });
     },
-    openAssignment() {
-      
-    },
+    openAssignment(studentId) {
+      this.$router
+        .push("/t/" + this.username + "/" + this.assignmentId + "/submissions/" + studentId)
+        .catch(err => {
+          console.log(err);
+        });
+    }
   }
 };
 </script>
