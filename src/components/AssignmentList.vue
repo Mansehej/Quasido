@@ -132,12 +132,12 @@ export default {
         semester: "",
         subject: "",
         due: "",
-        name
+        name: ""
       },
       newAssignmentOptions: {
-        courseList: ["B.Tech"],
+        courseList: ["BTech"],
         batchList: ["CSE", "IT"],
-        shiftList: ["Evening"],
+        shiftList: ["2"],
         semesterList: ["6"],
         subjectList: [
           "Artifcial Intelligence",
@@ -167,6 +167,14 @@ export default {
       return dashedId;
     },
     async createAssignment() {
+
+      Object.keys(this.newAssignment).forEach(property => {
+        if(typeof this.newAssignment[property] == "string") {
+          this.newAssignment[property] = this.newAssignment[property].toLowerCase()
+        }
+      })
+
+
       let vm = this;
       let date = new Date(this.newAssignment.due);
       date.setHours(23);
