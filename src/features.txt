@@ -1,0 +1,13 @@
+- Login as teacher/ student
+- Teacher can make assignments and select which branch, batch and subject to submit it for
+- Teacher can set due date
+- Teacher can paste in the editor while writing assignments
+- Teacher can save assignment drafts
+- Teacher can submit assignments and will not be able to make any changes after that
+- Teacher can view list of all assignments she has given with submission dates
+- Teacher can view submissions to each assignment with time of submission and enrollment number
+- Student can view assignments given to his class
+- Student can view due date of assignments
+- Student can write an assignment but CANNOT paste in the editor (Warning pops up)
+- Student can save assignment drafts
+- Student can submit assignment and will not be able to make any changes after that
