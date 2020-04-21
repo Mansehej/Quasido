@@ -3,6 +3,13 @@
     <br />
     <h5 class="text-center text-red" v-if="isSubmitted">Assignment already submitted</h5>
     <br />
+     <writer-component
+      v-if="loaded==true"
+      ref="writer"
+      :enablePaste="false"
+      :initialContent="this.assignmentQuestion"
+      :isReadOnly="true"
+    />
     <q-btn v-if="loaded && !isSubmitted" flat label="Save Assignment" @click="saveAssignment()" />
     <q-btn
       v-if="loaded && !isSubmitted"
@@ -87,7 +94,8 @@ export default {
       studentAssignmentStore: {},
       submitAssignmentStore: {},
       classroomAssignmentStore: {},
-      studentDetails: {}
+      studentDetails: {},
+      assignmentQuestion: {}
     };
   },
 
@@ -99,6 +107,7 @@ export default {
   async created() {
     await this.checkCorrectUser();
     await this.setStores();
+    this.loadQuestion();
     this.loadContentAndStatus();
   },
 
@@ -128,6 +137,13 @@ export default {
 
     pasteEvent() {
       this.pasteAlert = true;
+    },
+
+    loadQuestion() {
+      let vm=this
+      this.classroomAssignmentStore.get().then(assignment => {
+        vm.assignmentQuestion = assignment.data().content
+      })
     },
 
     setUserTypeIdAndPaste() {
