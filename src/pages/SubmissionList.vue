@@ -15,6 +15,12 @@
             lines="1"
             class="text-capitalize"
           >Submission date: {{ submission.date.toDate().toDateString()}}</q-item-label>
+          <q-item-label
+          v-if="submission.cheated"
+            caption
+            lines="1"
+            class="text-capitalize text-negative"
+          >Unfair Means Used</q-item-label>
         </q-item-section>
       </q-item>
     </q-list>
@@ -72,7 +78,8 @@ export default {
           submissionList.forEach(submission => {
             vm.submissionList.push({
               student: submission.id,
-              date: submission.data().timestamp
+              date: submission.data().timestamp,
+              cheated: submission.data().cheated
             });
           });
         });
