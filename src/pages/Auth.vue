@@ -21,7 +21,7 @@
         <q-tab-panel name="register">
           <login-register :tab="tab" />
         </q-tab-panel>
-      </q-tab-panels>-->
+      </q-tab-panels>
 
       <q-separator inset />
       <!-- <div
