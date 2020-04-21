@@ -2,7 +2,7 @@
   <div>
     <br />
     <div class="text-center text-h5 text-primary">{{studentId}}</div>
-    <div class="text-center text-subtitle2 text-accent">Submitted: {{submissionDate.toDate().toDateString()}}</div>
+    <div class="text-center text-subtitle2 text-accent" v-if="loaded==true" >Submitted: {{submissionDate.toDate().toDateString()}}</div>
     <br />
     <writer-component
       v-if="loaded==true"
