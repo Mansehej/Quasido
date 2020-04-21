@@ -1,6 +1,6 @@
 <template>
-  <div class="editor"> 
-    <editor-menu-bar v-if="!isReadOnly" :editor="editor" v-slot="{ commands, isActive }"  >
+  <div class="editor">
+    <editor-menu-bar v-if="!isReadOnly" :editor="editor" v-slot="{ commands, isActive }">
       <div class="menubar">
         <div class="toolbar">
           <button class="menubar__button" @click="commands.undo">
@@ -209,14 +209,15 @@ export default {
   props: {
     enablePaste: Boolean,
     isReadOnly: Boolean,
+    enableCheatDetection: Boolean,
     initialContent: Object
   },
   data() {
-    let pasteProp = {};
+    let editorProps = {};
     if (!this.enablePaste) {
-      pasteProp = {
+      editorProps = {
         handlePaste: () => {
-          this.onPasteEvent()
+          this.onPasteEvent();
           return true;
         }
       };
@@ -243,26 +244,53 @@ export default {
       }),
       new TableHeader(),
       new TableCell(),
-      new TableRow(),
+      new TableRow()
     ];
     return {
       editor: new Editor({
-        editorProps: pasteProp,
+        editorProps: editorProps,
         extensions: extensionList,
         editable: !this.isReadOnly,
-        content: this.initialContent
-      })
+        content: this.initialContent,
+        onUpdate: () => {
+          if (this.enableCheatDetection) {
+            this.updateHandler();
+          }
+        }
+      }),
+      textLength: 0,
+      initialising: true
     };
   },
   methods: {
     getContent() {
       return this.editor.getJSON();
     },
-    setContent(content) {
+    getHTML() {
+      return this.editor.getHTML();
+    },
+    setContent(content, initial = false) {
       this.editor.setContent(content);
     },
     onPasteEvent() {
       this.$emit("paste", "Normal paste attempted");
+    },
+    updateHandler() {
+      var span = document.createElement("span");
+      span.innerHTML = this.getHTML();
+      let textContent = span.textContent || span.innerText;
+      let contentDifference = textContent.length - this.textLength;
+      if (
+        this.initialising == true &&
+        this.getContent() == this.initialContent
+      ) {
+        console.log("Initial load");
+        this.initialising = false;
+      } else if (contentDifference > 2) {
+        this.$emit("cheated", contentDifference);
+        console.log("cheated");
+      }
+      this.textLength = textContent.length;
     }
   },
   beforeDestroy() {
