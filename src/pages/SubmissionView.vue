@@ -2,7 +2,14 @@
   <div>
     <br />
     <div class="text-center text-h5 text-primary">{{studentId}}</div>
-    <div class="text-center text-subtitle2 text-accent" v-if="loaded==true" >Submitted: {{submissionDate.toDate().toDateString()}}</div>
+    <div
+      class="text-center text-subtitle2 text-accent"
+      v-if="loaded==true"
+    >Submitted: {{submissionDate.toDate().toDateString()}}</div>
+    <div
+      class="text-center text-subtitle2 text-negative"
+      v-if="loaded==true && cheatStatus == true"
+    >Student caught using unfair means of pasting content.</div>
     <br />
     <writer-component
       v-if="loaded==true"
@@ -32,7 +39,8 @@ export default {
   data() {
     return {
       loaded: false,
-      initialContent: {}
+      initialContent: {},
+      cheatStatus: false
     };
   },
 
@@ -78,7 +86,8 @@ export default {
         .then(submission => {
           vm.submissionDate = submission.data().timestamp;
           vm.initialContent = submission.data().content;
-          console.log(vm.initialContent)
+          vm.cheatStatus = submission.data().cheated
+          console.log(vm.initialContent);
           vm.loaded = true;
         })
         .catch(error => {
