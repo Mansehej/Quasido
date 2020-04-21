@@ -95,6 +95,7 @@ export default {
       await appStore.setValue("uid", user.uid);
       await appStore.setValue("displayPicture", user.photoURL);
       await appStore.setValue("userDetails", rollData);
+      await appStore.setValue("userType", this.$props.type.charAt(0))
       return true;
     }
 
