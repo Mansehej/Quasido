@@ -18,7 +18,6 @@ let appStore = new Store("app");
 export default {
   props: {
     username: String,
-    userType: String
   },
   components: {
     "assignment-list": require("../components/AssignmentList.vue").default
@@ -57,7 +56,7 @@ export default {
       }
     },
     setUserTypeId() {
-      this.userType = "t";
+      this.userTypeId = "t";
     },
     async getAssignmentList() {
       let teacherDetails = await appStore.getValue("userDetails");
