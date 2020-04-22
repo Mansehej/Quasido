@@ -1,5 +1,6 @@
 <template>
   <q-page>
+    <div v-if="submissionList.length==0" class="q-ma-sm text-negative">No submissions yet.</div>
     <q-list bordered>
       <q-item
         v-for="submission in submissionList"
@@ -16,7 +17,7 @@
             class="text-capitalize"
           >Submission date: {{ submission.date.toDate().toDateString()}}</q-item-label>
           <q-item-label
-          v-if="submission.cheated"
+            v-if="submission.cheated"
             caption
             lines="1"
             class="text-capitalize text-negative"
@@ -86,7 +87,14 @@ export default {
     },
     openAssignment(studentId) {
       this.$router
-        .push("/t/" + this.username + "/" + this.assignmentId + "/submissions/" + studentId)
+        .push(
+          "/t/" +
+            this.username +
+            "/" +
+            this.assignmentId +
+            "/submissions/" +
+            studentId
+        )
         .catch(err => {
           console.log(err);
         });
