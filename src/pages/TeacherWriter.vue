@@ -260,7 +260,6 @@ export default {
         submissions: []
       };
 
-      console.log(setObj);
       this.classroomAssignmentStore
         .doc(this.assignmentId)
         .set(setObj)
@@ -270,6 +269,10 @@ export default {
         .catch(function(error) {
           console.error("Error writing document: ", error);
         });
+
+      this.$router.push("/t/" + this.username).catch(err => {
+        console.log(err);
+      });
     },
 
     saveAssignment(status = "draft") {
