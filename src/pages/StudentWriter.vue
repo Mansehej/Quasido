@@ -158,7 +158,7 @@ export default {
               console.log(status + " writing succesfull");
             })
             .catch(error => {
-              console.log(error)
+              console.log(error);
             });
         });
     },
@@ -264,6 +264,10 @@ export default {
 
       this.classroomAssignmentStore.update({
         submissions: firebase.firestore.FieldValue.arrayUnion(this.username)
+      });
+
+      this.$router.push("/s/" + this.username).catch(err => {
+        console.log(err);
       });
     },
 
