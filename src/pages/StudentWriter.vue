@@ -148,6 +148,18 @@ export default {
         })
         .then(function() {
           console.log(status + " writing succesfull");
+        })
+        .catch(error => {
+          this.assignmentStore
+            .set({
+              cheated: true
+            })
+            .then(function() {
+              console.log(status + " writing succesfull");
+            })
+            .catch(error => {
+              console.log(error)
+            });
         });
     },
 
