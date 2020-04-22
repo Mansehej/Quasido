@@ -9,7 +9,7 @@
 
     <q-card style="width:50hh">
       <q-card-section>
-        <div class="text-h6 text-capitalize">{{tab}}</div>
+        <div class="text-h6 text-capitalize text-center">{{userType}} Login</div>
       </q-card-section>
 
       <q-separator inset />
@@ -24,6 +24,10 @@
       </q-tab-panels>
 
       <q-separator inset />
+
+      <q-card-section class="q-pa-xs">
+        <q-btn flat class="text-capitalize full-width" @click="changeAuth()">Login as {{otherType}}</q-btn>
+      </q-card-section>
       <!-- <div
         style="margin-top:1vh"
         class="text-subtitle text-center text-weight-light v"
@@ -48,9 +52,16 @@
 <script>
 export default {
   data() {
+    let otherType
+    if (this.userType == "student") {
+      otherType = "teacher";
+    } else {
+      otherType = "student";
+    }
     return {
       tab: "login",
-      type: "student"
+      type: "student",
+      otherType: otherType
     };
   },
   props: {
@@ -62,6 +73,16 @@ export default {
   components: {
     "login-register": require("../components/LoginRegister.vue").default
     // "google-login": require("../components/GoogleLogin.vue").default
+  },
+  methods: {
+    changeAuth() {
+      this.$router.push("/auth/" + this.otherType).catch(err => {
+        console.log(err);
+      });
+      this.$router.go().catch(err => {
+        console.log(err);
+      });
+    }
   }
 };
 </script>
