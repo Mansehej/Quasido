@@ -1,10 +1,13 @@
 - Catch in case of unidentified username in auth ( assign till that collaction to a variable and check if undefined.)
 - Add checking of usertype on each page too (assign in localStorage)
 - Fix menu bar to float
-- Detection of 3rd party paste
+- Detection of auto typer
 - UI/UX fixes
 - Database normalize
-- Security rules of database
-- Switching to teacher ui button
+- Security rules of Database
 - Upload of pdf
 - Inline images in editor
+- Free space after specified time 
+- Allow percent of plagarism (10-25)
+- Allot marks by teacher
+- Studewt wise list of evaluated, assignments suybmitted wtc (report card type, exported as csv)
