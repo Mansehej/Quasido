@@ -13,6 +13,7 @@
 let COLLEGE_NAME = "msit";
 // IMPLEMENT OPENING PARTICULAR SCRIPT FROM LIST.
 import { firebaseDb } from "boot/firebase";
+import * as firebase from "firebase";
 import Store from "../store/store.js";
 let appStore = new Store("app");
 export default {
@@ -65,20 +66,21 @@ export default {
     },
     async getAssignmentList() {
       let studentDetails = await appStore.getValue("userDetails");
+      let studentId = await appStore.getValue("studentId")
       await firebaseDb
-        .collection(COLLEGE_NAME)
-        .doc("classrooms")
-        .collection(studentDetails.stream)
-        .doc(studentDetails.batch)
-        .collection("shift_" + studentDetails.shift)
-        .doc("semester_" + studentDetails.semester)
-        .collection("assignments")
+        .collection("assignment")
+        .where("batch_id", "==", studentDetails.batch_id)
+        .where("due", ">=", firebase.firestore.Timestamp.now())
+        .where("status", "==", "submitted")
         .orderBy("due")
         .get()
         .then(async assignmentList => {
-          assignmentList.forEach(assignment => {
+          if (assignmentList.empty) {
+            return;
+          }
+          assignmentList.forEach(async assignment => {
             let assignmentObj = assignment.data();
-            if (assignmentObj.submissions.includes(this.username)) {
+            if (assignmentObj.submissions.includes(studentId)) {
               assignmentObj["submitted"] = true;
             }
             assignmentObj["id"] = assignment.id;
