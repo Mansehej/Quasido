@@ -84,9 +84,9 @@
         v-ripple
       >
         <q-item-section @click="openAssignment(assignment.subject, assignment.id)">
-          <q-item-label>{{ assignment.name }}</q-item-label>
-          <q-item-label caption lines="1" class="text-capitalize">{{ assignment.subject}}</q-item-label>
-          <q-item-label v-if="!assignment.submitted" caption lines="1" class="text-secondary">
+          <q-item-label>{{ assignment.title }}</q-item-label>
+          <q-item-label caption lines="1" class="text-capitalize">{{ assignment.subject_name}}</q-item-label>
+          <q-item-label v-if="!assignment.submitted" caption lines="1" class="text-negative">
             Due date:
             {{assignment.due.toDate().toDateString()}}
           </q-item-label>
@@ -149,7 +149,6 @@ export default {
   },
   methods: {
     openAssignment(subject, id) {
-      console.log("user type; " + this.userType);
       if (this.userType == "s") {
         // let dashedId = this.getDashedId(subject, id);
         this.$router.push("/s/" + this.username + "/" + id).catch(err => {
@@ -195,7 +194,6 @@ export default {
           vm.openAssignment(vm.newAssignment.subject, assignmentId);
         })
         .catch(function(error) {
-          console.error("Error adding document: ", error);
         });
     },
     async generateId() {
