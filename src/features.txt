@@ -9,5 +9,6 @@
 - Student can view assignments given to his class
 - Student can view due date of assignments
 - Student can write an assignment but CANNOT paste in the editor (Warning pops up)
+- If a student finds an unauthorized way to paste content, then he won't know anything is wrong, but the teacher will get a message of UFM.
 - Student can save assignment drafts
 - Student can submit assignment and will not be able to make any changes after that
