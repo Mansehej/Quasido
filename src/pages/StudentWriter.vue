@@ -87,6 +87,8 @@ export default {
   data() {
     return {
       loaded: false,
+      userId: "",
+      responseId: "",
       userTypeId: "",
       enablePaste: false,
       pasteAlert: false,
@@ -108,7 +110,7 @@ export default {
 
   async created() {
     await this.checkCorrectUser();
-    await this.setStores();
+    // await this.setStores();
     this.loadQuestion();
     this.loadContentAndStatus();
   },
@@ -134,6 +136,7 @@ export default {
           });
       } else {
         this.studentDetails = await appStore.getValue("userDetails");
+        this.studentId = await appStore.getValue("userId");
       }
     },
 
@@ -142,32 +145,23 @@ export default {
     },
 
     cheatEvent() {
-      this.assignmentStore
-        .update({
-          cheated: true
-        })
-        .then(function() {
-          console.log(status + " writing succesfull");
-        })
-        .catch(error => {
-          this.assignmentStore
-            .set({
-              cheated: true
-            })
-            .then(function() {
-              console.log(status + " writing succesfull");
-            })
-            .catch(error => {
-              console.log(error);
-            });
-        });
+      if (!this.responseId) {
+        this.setAssignment("draft", true);
+        return;
+      }
+
+      this.saveAssignment("draft", true);
     },
 
     loadQuestion() {
       let vm = this;
-      this.classroomAssignmentStore.get().then(assignment => {
-        vm.assignmentQuestion = assignment.data().content;
-      });
+      firebaseDb
+        .collection("assignment")
+        .doc(this.assignmentId)
+        .get()
+        .then(assignment => {
+          vm.assignmentQuestion = assignment.data().question;
+        });
     },
 
     setUserTypeIdAndPaste() {
@@ -178,40 +172,33 @@ export default {
 
     loadContentAndStatus() {
       let vm = this;
-      this.assignmentStore.get().then(function(doc) {
-        if (doc.exists) {
-          if (doc.data().status == "submitted") {
-            console.log("Is submitted");
-            vm.isSubmitted = true;
-          }
-          vm.initialContent = doc.data().content;
-        } else {
-          vm.initialContent = {
-            type: "doc",
-            content: [
-              {
-                type: "paragraph"
+
+      firebaseDb
+        .collection("assignment_response")
+        .where("assignment_id", "==", this.assignmentId)
+        .where("student_id", "==", this.studentId)
+        .get()
+        .then(function(responses) {
+          if (!responses.empty) {
+            responses.forEach(response => {
+              vm.responseId = response.id;
+              if (response.data().status == "submitted") {
+                vm.isSubmitted = true;
               }
-            ]
-          };
-        }
-        vm.loaded = true;
-
-        console.log("loaded");
-      });
-    },
-
-    async loadContent() {
-      console.log("loading content");
-      this.clearEditorContent();
-      let content = this.assignmentStore.get().then(function(doc) {
-        if (doc.exists) {
-          this.setEditorContent(doc.data().content);
-          console.log("Setting " + doc.data().content);
-        } else {
-          this.setEditorContent("Hello");
-        }
-      });
+              vm.initialContent = response.data().response;
+            });
+          } else {
+            vm.initialContent = {
+              type: "doc",
+              content: [
+                {
+                  type: "paragraph"
+                }
+              ]
+            };
+          }
+          vm.loaded = true;
+        });
     },
 
     clearEditorContent() {
@@ -222,79 +209,87 @@ export default {
       this.$refs.writer.setContent(content);
     },
 
-    setStores() {
-      this.studentAssignmentStore = firebaseDb
-        .collection(COLLEGE_NAME)
-        .doc("students")
-        .collection(this.username)
-        .doc("assignments")
-        .collection(this.assignmentId);
-
-      this.assignmentStore = firebaseDb
-        .collection(COLLEGE_NAME)
-        .doc("assignments")
-        .collection(this.assignmentId)
-        .doc(this.username);
-
-      this.classroomAssignmentStore = firebaseDb
-        .collection(COLLEGE_NAME)
-        .doc("classrooms")
-        .collection(this.studentDetails.stream)
-        .doc(this.studentDetails.batch)
-        .collection("shift_" + this.studentDetails.shift)
-        .doc("semester_" + this.studentDetails.semester)
-        .collection("assignments")
-        .doc(this.assignmentId);
-    },
-
     async submitAssignment() {
       this.saveAssignment("submitted");
 
-      this.studentAssignmentStore
-        .doc("info")
-        .set({
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      firebaseDb
+        .collection("assignment")
+        .doc(this.assignmentId)
+        .update({
+          submissions: firebase.firestore.FieldValue.arrayUnion(this.studentId)
         })
         .then(function() {
-          console.log("Document successfully saved!");
+          console.log("Assignment submitted.");
         })
         .catch(function(error) {
-          console.error("Error writing document: ", error);
+          console.error("Error submiting document: ", error);
         });
-
-      this.classroomAssignmentStore.update({
-        submissions: firebase.firestore.FieldValue.arrayUnion(this.username)
-      });
 
       this.$router.push("/s/" + this.username).catch(err => {
         console.log(err);
       });
     },
 
-    saveAssignment(status = "draft") {
+    saveAssignment(status = "draft", cheated = false) {
       let vm = this;
-      this.assignmentStore
-        .update({
-          content: this.getEditorContent(),
+
+      if (!this.responseId) {
+        this.setAssignment();
+        return;
+      }
+
+      if (cheated) {
+        firebaseDb
+          .collection("assignment_response")
+          .doc(this.responseId)
+          .update({
+            response: this.getEditorContent(),
+            status: status,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            cheated: cheated
+          })
+          .then(function() {
+            console.log("Update " + status + " succesfull");
+          })
+          .catch(error => {
+            this.setAssignment();
+          });
+      } else {
+        firebaseDb
+          .collection("assignment_response")
+          .doc(this.responseId)
+          .update({
+            response: this.getEditorContent(),
+            status: status,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          })
+          .then(function() {
+            console.log("Update " + status + " succesfull");
+          })
+          .catch(error => {
+            this.setAssignment();
+          });
+      }
+    },
+
+    setAssignment(status = "draft", cheated = false) {
+      let vm = this;
+      firebaseDb
+        .collection("assignment_response")
+        .add({
+          response: this.getEditorContent(),
           status: status,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          student_id: this.studentId,
+          assignment_id: this.assignmentId,
+          cheated: cheated
         })
-        .then(function() {
+        .then(function(doc) {
+          vm.responseId = doc.id;
           console.log(status + " writing succesfull");
         })
-        .catch(error => {
-          this.assignmentStore
-            .set({
-              content: vm.getEditorContent(),
-              status: status,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            })
-            .then(function() {
-              console.log(status + " writing succesfull");
-            })
-            .catch(function(error) {
-              console.error("Error writing document: ", error);
-            });
+        .catch(function(error) {
+          console.error("Error writing document: ", error);
         });
     },
 
