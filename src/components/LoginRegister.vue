@@ -35,13 +35,20 @@ export default {
       }
     };
   },
+
+  created() {
+    if (this.$props.type == "student") {
+      this.label = "Enrollment Number";
+      this.userType = "student";
+    } else {
+      this.label = "Username";
+      this.userType = "teacher";
+    }
+  },
+
   methods: {
     submitForm() {
-      // if (this.tab == "login") {
       this.login();
-      // } else if (this.tab == "register") {
-      //   this.register();
-      // }
     },
     async login() {
       let vm = this;
@@ -86,7 +93,7 @@ export default {
           } else if (error.code == "auth/wrong-password") {
             this.formData.errorText = "Incorrect password!";
           } else {
-            this.formData.errorText = error.message
+            this.formData.errorText = error.message;
           }
         });
     },
@@ -101,31 +108,6 @@ export default {
       await appStore.setValue("userDetails", userData);
       await appStore.setValue("userType", this.$props.type.charAt(0));
       return true;
-    }
-
-    // register() {
-    //   firebaseAuth
-    //     .createUserWithEmailAndPassword(
-    //       this.formData.roll,
-    //       this.formData.password
-    //     )
-    //     .then(response => {
-    //       response.user.updateProfile({
-    //         displayName: this.formData.name
-    //       });
-    //     })
-    //     .catch(error => {
-    //       this.formData.errorText = error.message;
-    //     });
-    // }
-  },
-  created: function() {
-    if (this.$props.type == "student") {
-      this.label = "Enrollment Number";
-      this.userType = "student";
-    } else {
-      this.label = "Username";
-      this.userType = "teacher";
     }
   }
 };
