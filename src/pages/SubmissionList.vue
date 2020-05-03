@@ -45,7 +45,8 @@ export default {
   },
   data() {
     return {
-      submissionList: []
+      submissionList: [],
+      loaded:false
     };
   },
   async mounted() {
@@ -87,6 +88,7 @@ export default {
               cheated: submission.data().cheated
             });
             this.$q.loading.hide();
+            this.loaded=true;
           });
         });
     },
