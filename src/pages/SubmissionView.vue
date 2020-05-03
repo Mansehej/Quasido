@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="loaded">
     <br />
     <div class="text-center text-h5 text-primary">{{submissionName}}</div>
     <div class="text-center text-h5 text-primary">({{submissionRoll}})</div>
@@ -54,6 +54,7 @@ export default {
   },
 
   async created() {
+    this.$q.loading.show();
     await this.checkCorrectUser();
     this.loadContent();
   },
@@ -92,6 +93,7 @@ export default {
           vm.cheatStatus = submission.data().cheated;
           console.log(vm.initialContent);
           vm.loaded = true;
+          this.$q.loading.hide();
         })
         .catch(error => {
           console.log(error);

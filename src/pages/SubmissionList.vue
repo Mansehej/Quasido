@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <div v-if="submissionList.length==0" class="q-ma-sm text-negative">No submissions yet.</div>
+    <div v-if="submissionList.length==0 && loaded" class="q-ma-sm text-negative">No submissions yet.</div>
     <q-list bordered>
       <q-item
         v-for="submission in submissionList"
@@ -49,6 +49,8 @@ export default {
     };
   },
   async mounted() {
+    this.$q.loading.show();
+
     await this.checkCorrectUser();
     this.userTypeId = "t";
     await this.getSubmissionList();
@@ -84,6 +86,7 @@ export default {
               date: submission.data().timestamp,
               cheated: submission.data().cheated
             });
+            this.$q.loading.hide();
           });
         });
     },
