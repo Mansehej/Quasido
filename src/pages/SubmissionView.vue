@@ -1,7 +1,8 @@
 <template>
-  <div>
+  <div v-if="loaded">
     <br />
-    <div class="text-center text-h5 text-primary">{{studentId}}</div>
+    <div class="text-center text-h5 text-primary">{{submissionName}}</div>
+    <div class="text-center text-h5 text-primary">({{submissionRoll}})</div>
     <div
       class="text-center text-subtitle2 text-accent"
       v-if="loaded==true"
@@ -40,17 +41,20 @@ export default {
     return {
       loaded: false,
       initialContent: {},
-      cheatStatus: false
+      cheatStatus: false,
+      submissionName: "",
+      submissionRoll: ""
     };
   },
 
   props: {
     username: String,
     assignmentId: String,
-    studentId: String
+    submissionId: String
   },
 
   async created() {
+    this.$q.loading.show();
     await this.checkCorrectUser();
     this.loadContent();
   },
@@ -78,17 +82,18 @@ export default {
       let vm = this;
 
       firebaseDb
-        .collection(COLLEGE_NAME)
-        .doc("assignments")
-        .collection(this.assignmentId)
-        .doc(this.studentId)
+        .collection("assignment_response")
+        .doc(this.submissionId)
         .get()
         .then(submission => {
+          vm.submissionName = submission.data().student_name;
+          vm.submissionRoll = submission.data().student_roll;
           vm.submissionDate = submission.data().timestamp;
-          vm.initialContent = submission.data().content;
-          vm.cheatStatus = submission.data().cheated
+          vm.initialContent = submission.data().response;
+          vm.cheatStatus = submission.data().cheated;
           console.log(vm.initialContent);
           vm.loaded = true;
+          this.$q.loading.hide();
         })
         .catch(error => {
           console.log(error);

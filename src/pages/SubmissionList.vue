@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <div v-if="submissionList.length==0" class="q-ma-sm text-negative">No submissions yet.</div>
+    <div v-if="submissionList.length==0 && loaded" class="q-ma-sm text-negative">No submissions yet.</div>
     <q-list bordered>
       <q-item
         v-for="submission in submissionList"
@@ -9,8 +9,9 @@
         clickable
         v-ripple
       >
-        <q-item-section @click="openAssignment(submission.student)">
-          <q-item-label>{{ submission.student }}</q-item-label>
+        <q-item-section @click="openAssignment(submission.id)">
+          <q-item-label>{{ submission.studentName }}</q-item-label>
+          <q-item-label>{{ submission.studentRoll }}</q-item-label>
           <q-item-label
             caption
             lines="1"
@@ -44,10 +45,13 @@ export default {
   },
   data() {
     return {
-      submissionList: []
+      submissionList: [],
+      loaded:false
     };
   },
   async mounted() {
+    this.$q.loading.show();
+
     await this.checkCorrectUser();
     this.userTypeId = "t";
     await this.getSubmissionList();
@@ -71,21 +75,24 @@ export default {
     getSubmissionList() {
       let vm = this;
       firebaseDb
-        .collection(COLLEGE_NAME)
-        .doc("assignments")
-        .collection(this.assignmentId)
+        .collection("assignment_response")
+        .where("assignment_id", "==", this.assignmentId)
         .get()
         .then(submissionList => {
           submissionList.forEach(submission => {
             vm.submissionList.push({
-              student: submission.id,
+              id: submission.id,
+              studentName: submission.data().student_name,
+              studentRoll: submission.data().student_roll,
               date: submission.data().timestamp,
               cheated: submission.data().cheated
             });
+            this.$q.loading.hide();
+            this.loaded=true;
           });
         });
     },
-    openAssignment(studentId) {
+    openAssignment(submissionId) {
       this.$router
         .push(
           "/t/" +
@@ -93,7 +100,7 @@ export default {
             "/" +
             this.assignmentId +
             "/submissions/" +
-            studentId
+            submissionId
         )
         .catch(err => {
           console.log(err);

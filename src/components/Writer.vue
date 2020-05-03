@@ -176,6 +176,7 @@
 </style>
 
 <script>
+let MAX_CHAR_UPDATE_ALLOWED = 45
 import { Editor, EditorContent, EditorMenuBar } from "tiptap";
 import {
   Blockquote,
@@ -286,7 +287,7 @@ export default {
       ) {
         console.log("Initial load");
         this.initialising = false;
-      } else if (contentDifference > 2) {
+      } else if (contentDifference > MAX_CHAR_UPDATE_ALLOWED) {
         this.$emit("cheated", contentDifference);
         console.log("cheated");
       }

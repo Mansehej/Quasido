@@ -35,26 +35,38 @@ export default {
       }
     };
   },
+
+  created() {
+    if (this.$props.type == "student") {
+      this.label = "Enrollment Number";
+      this.userType = "student";
+    } else {
+      this.label = "Username";
+      this.userType = "teacher";
+    }
+  },
+
   methods: {
     submitForm() {
-      // if (this.tab == "login") {
       this.login();
-      // } else if (this.tab == "register") {
-      //   this.register();
-      // }
     },
     async login() {
+      let vm = this;
       await firebaseDb
-        .collection(COLLEGE_NAME)
-        .doc(`${this.userType}`)
-        .collection(this.formData.roll)
-        .doc("info")
+        .collection(this.userType)
+        .where("roll", "==", this.formData.roll)
         .get()
-        .then(async doc => {
+        .then(async userList => {
+          if (userList.empty) {
+            vm.errorText = "No such user found.";
+            return;
+          }
           try {
-            this.authenticate(doc.data());
+            userList.forEach(user => {
+              this.authenticate(user.id, user.data());
+            });
           } catch (error) {
-            console.log(error);
+            this.errorText = err.message;
           }
         })
         .catch(err => {
@@ -62,66 +74,40 @@ export default {
         });
     },
 
-    async authenticate(rollData) {
+    async authenticate(userId, userData) {
       firebaseAuth
-        .signInWithEmailAndPassword(rollData.email, this.formData.password)
+        .signInWithEmailAndPassword(userData.email, this.formData.password)
         .then(async response => {
           let user = response.user;
           user.updateProfile({
-            displayName: rollData.name
+            displayName: userData.name
           });
-          await this.setAppStore(rollData, user);
-          console.log(await appStore.getKeyValuePair());
+          await this.setAppStore(userId, userData, user);
           this.$router.push(
             `/${this.$props.type.charAt(0)}/${this.formData.roll}`
           );
         })
         .catch(error => {
-          console.log(error.code);
           if (error.code == "auth/user-not-found") {
             this.formData.errorText = "User does not exist!";
           } else if (error.code == "auth/wrong-password") {
             this.formData.errorText = "Incorrect password!";
           } else {
-            console.log(error);
+            this.formData.errorText = error.message;
           }
         });
     },
 
-    async setAppStore(rollData, user) {
+    async setAppStore(userId, userData, user) {
       await appStore.setValue("username", this.formData.roll);
       await appStore.setValue("signedInStatus", true);
-      await appStore.setValue("displayName", rollData.name);
-      await appStore.setValue("uid", user.uid);
+      await appStore.setValue("displayName", userData.name);
+      await appStore.setValue("authUid", user.uid);
+      await appStore.setValue("userId", userId);
       await appStore.setValue("displayPicture", user.photoURL);
-      await appStore.setValue("userDetails", rollData);
-      await appStore.setValue("userType", this.$props.type.charAt(0))
+      await appStore.setValue("userDetails", userData);
+      await appStore.setValue("userType", this.$props.type.charAt(0));
       return true;
-    }
-
-    // register() {
-    //   firebaseAuth
-    //     .createUserWithEmailAndPassword(
-    //       this.formData.roll,
-    //       this.formData.password
-    //     )
-    //     .then(response => {
-    //       response.user.updateProfile({
-    //         displayName: this.formData.name
-    //       });
-    //     })
-    //     .catch(error => {
-    //       this.formData.errorText = error.message;
-    //     });
-    // }
-  },
-  created: function() {
-    if (this.$props.type == "student") {
-      this.label = "Enrollment Number";
-      this.userType = "students";
-    } else {
-      this.label = "Username";
-      this.userType = "teachers";
     }
   }
 };

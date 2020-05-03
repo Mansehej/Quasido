@@ -37,7 +37,7 @@ const routes = [
         props: true
       },
       {
-        path: "/t/:username/:assignmentId/submissions/:studentId",
+        path: "/t/:username/:assignmentId/submissions/:submissionId",
         component: () => import("pages/SubmissionView.vue"),
         props: true
       }
