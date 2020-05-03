@@ -29,7 +29,7 @@ export default {
       assigmentPrompt: false,
       loaded: false,
       assignments: [],
-      userTypeId: "",
+      userTypeId: "s",
       errorText: ""
     };
   },
@@ -42,7 +42,6 @@ export default {
   },
   methods: {
     async checkCorrectUser() {
-      this.setUserTypeId();
       let signedInUser = await appStore.getValue("username");
       if (!signedInUser) {
         this.$router.push("/auth").catch(err => {
@@ -55,13 +54,6 @@ export default {
           .catch(err => {
             console.log(err);
           });
-      }
-    },
-    setUserTypeId() {
-      if (this.userType == "teacher" || this.userType == "t") {
-        this.userTypeId = "t";
-      } else {
-        this.userTypeId = "s";
       }
     },
     async getAssignmentList() {
