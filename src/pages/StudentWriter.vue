@@ -281,6 +281,8 @@ export default {
           status: status,
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           student_id: this.studentId,
+          student_name:this.studentDetails.name ,
+          student_roll:this.studentDetails.roll,
           assignment_id: this.assignmentId,
           cheated: cheated
         })
