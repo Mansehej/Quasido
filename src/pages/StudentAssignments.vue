@@ -66,7 +66,7 @@ export default {
     },
     async getAssignmentList() {
       let studentDetails = await appStore.getValue("userDetails");
-      let studentId = await appStore.getValue("studentId")
+      let studentId = await appStore.getValue("userId")
       await firebaseDb
         .collection("assignment")
         .where("batch_id", "==", studentDetails.batch_id)
