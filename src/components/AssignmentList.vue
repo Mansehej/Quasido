@@ -9,7 +9,7 @@
       <q-card style="min-width: 350px">
         <q-card-section>
           <div class="q-gutter-md no-wrap items-center" style="min-width: 18vw">
-            <q-input outlined v-model="newAssignment.name" type="text" label="Assignment Name" />
+            <q-input outlined v-model="newAssignment.title" type="text" label="Assignment Title" />
             <q-select
               outlined
               v-model="newAssignment.course"
@@ -18,21 +18,15 @@
             />
             <q-select
               outlined
+              v-model="newAssignment.branch"
+              :options="newAssignmentOptions.branchList"
+              label="Branch"
+            />
+            <q-select
+              outlined
               v-model="newAssignment.batch"
               :options="newAssignmentOptions.batchList"
               label="Batch"
-            />
-            <q-select
-              outlined
-              v-model="newAssignment.shift"
-              :options="newAssignmentOptions.shiftList"
-              label="Shift"
-            />
-            <q-select
-              outlined
-              v-model="newAssignment.semester"
-              :options="newAssignmentOptions.semesterList"
-              label="Semester"
             />
             <q-select
               outlined
@@ -83,11 +77,11 @@
         clickable
         v-ripple
       >
-        <q-item-section @click="openAssignment(assignment.subject, assignment.id)">
-          <q-item-label>{{ assignment.title }}</q-item-label>
+        <q-item-section @click="openAssignment(assignment.id)">
+          <q-item-label class="text-capitalize">{{ assignment.title }}</q-item-label>
           <q-item-label caption lines="1" class="text-capitalize">{{ assignment.subject_name}}</q-item-label>
           <q-item-label v-if="!assignment.submitted" caption lines="1" class="text-negative">
-            Due date:
+            Due Date:
             {{assignment.due.toDate().toDateString()}}
           </q-item-label>
           <q-item-label
@@ -100,8 +94,8 @@
             v-if="userType=='t'"
             caption
             lines="1"
-            class="text-positive"
-          >{{assignment.batch}}-{{assignment.shift}} | Semester {{assignment.semester}}</q-item-label>
+            class="text-positive text-capitalize"
+          >{{assignment.batch.toUpperCase()}} {{assignment.shift}} | {{assignment.year}} Batch</q-item-label>
         </q-item-section>
       </q-item>
     </q-list>
@@ -109,8 +103,8 @@
 </template>
 
 <script>
-let COLLEGE_NAME = "msit";
-let SCRIPT_ID_LENGTH = 11;
+import Store from "../store/store.js";
+let appStore = new Store("app");
 
 import { firebaseDb } from "boot/firebase";
 import * as firebase from "firebase";
@@ -127,30 +121,28 @@ export default {
       duePrompt: false,
       newAssignment: {
         course: "",
+        branch: "",
         batch: "",
-        shift: "",
-        semester: "",
         subject: "",
         due: "",
-        name: ""
+        title: ""
       },
       newAssignmentOptions: {
         courseList: ["BTech"],
-        batchList: ["CSE", "IT"],
-        shiftList: ["2"],
-        semesterList: ["6"],
+        branchList: ["CSE-1", "CSE-2", "IT-1", "IT-2", "CSE-E", "IT-E"],
+        batchList: ["2021"],
         subjectList: [
           "Artifcial Intelligence",
           "Compiler Design",
-          "Web Engineering, Operating Systems"
+          "Web Engineering",
+          "Operating Systems"
         ]
       }
     };
   },
   methods: {
-    openAssignment(subject, id) {
+    openAssignment(id) {
       if (this.userType == "s") {
-        // let dashedId = this.getDashedId(subject, id);
         this.$router.push("/s/" + this.username + "/" + id).catch(err => {
           console.log(err);
         });
@@ -160,19 +152,14 @@ export default {
         });
       }
     },
-    getDashedId(subject, id) {
-      let dashedSubject = subject.replace(/\s+/g, "-");
-      let dashedId = dashedSubject + "-" + id;
-      return dashedId;
-    },
     async createAssignment() {
-
       Object.keys(this.newAssignment).forEach(property => {
-        if(typeof this.newAssignment[property] == "string") {
-          this.newAssignment[property] = this.newAssignment[property].toLowerCase()
+        if (typeof this.newAssignment[property] == "string") {
+          this.newAssignment[property] = this.newAssignment[
+            property
+          ].toLowerCase();
         }
-      })
-
+      });
 
       let vm = this;
       let date = new Date(this.newAssignment.due);
@@ -180,31 +167,34 @@ export default {
       date.setMinutes(59);
       date.setSeconds(59);
       this.newAssignment.due = firebase.firestore.Timestamp.fromDate(date);
+      let teacherId = await appStore.getValue("userId");
 
-      let assignmentId = await this.generateId();
-      this.teacherAssignmentStore = firebaseDb
-        .collection(COLLEGE_NAME)
-        .doc("teachers")
-        .collection(this.username)
-        .doc("assignments")
-        .collection("list")
-        .doc(assignmentId)
-        .set(this.newAssignment)
-        .then(function() {
-          vm.openAssignment(vm.newAssignment.subject, assignmentId);
+      let batchName =
+        this.newAssignment.batch + "-" + this.newAssignment.branch;
+
+      // Get object of batch and subject and set in below object
+
+      firebaseDb
+        .collection("assignment")
+        .add({
+          batch_id: batch.id,
+          batch_name: batchName,
+          created: firebase.firestore.FieldValue.serverTimestamp(),
+          due: this.newAssignment.due,
+          status: "draft",
+          subject: subject.id,
+          subject_name: this.newAssignment.subject,
+          title: this.newAssignment.title,
+          teacher_id: teacherId
         })
-        .catch(function(error) {
+        .then(assignment => {
+          vm.openAssignment(assignment.id);
+        })
+        .catch(error => {
+          console.log(error);
         });
+
     },
-    async generateId() {
-      var text = "";
-      var char_list = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-      for (var i = 0; i < SCRIPT_ID_LENGTH; i++) {
-        text += char_list.charAt(Math.floor(Math.random() * char_list.length));
-      }
-      return text;
-    },
-    openWriter(assignmentId) {}
   }
 };
 </script>
