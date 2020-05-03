@@ -17,7 +17,7 @@ import Store from "../store/store.js";
 let appStore = new Store("app");
 export default {
   props: {
-    username: String,
+    username: String
   },
   components: {
     "assignment-list": require("../components/AssignmentList.vue").default
@@ -27,7 +27,7 @@ export default {
       assigmentPrompt: false,
       loaded: false,
       assignments: [],
-      userTypeId: "",
+      userTypeId: "t",
       errorText: ""
     };
   },
@@ -35,12 +35,10 @@ export default {
     // Check if the user is accessing his/her own page
     this.$q.loading.show();
     await this.checkCorrectUser();
-    this.userTypeId = "t";
     await this.getAssignmentList();
   },
   methods: {
     async checkCorrectUser() {
-      this.setUserTypeId();
       let signedInUser = await appStore.getValue("username");
       if (!signedInUser) {
         this.$router.push("/auth").catch(err => {
@@ -55,29 +53,29 @@ export default {
           });
       }
     },
-    setUserTypeId() {
-      this.userTypeId = "t";
-    },
     async getAssignmentList() {
       let teacherDetails = await appStore.getValue("userDetails");
-      let vm = this
-      this.teacherAssignmentStore = firebaseDb
-        .collection(COLLEGE_NAME)
-        .doc("teachers")
-        .collection(this.username)
-        .doc("assignments")
-        .collection("list")
+      let teacherId = await appStore.getValue("userId");
+      let vm = this;
+
+      firebaseDb
+        .collection("assignment")
+        .where("teacher_id", "==", teacherId)
         .get()
         .then(async assignmentList => {
           assignmentList.forEach(assignment => {
             let assignmentObj = assignment.data();
+            let batchInfo = assignmentObj.batch_name.split("-");
+            console.log(batchInfo);
+            assignmentObj["batch"] = batchInfo[1] + "-" + batchInfo[2] ;
+            assignmentObj["year"] = batchInfo[0]
             assignmentObj["id"] = assignment.id;
             vm.assignments.push(assignmentObj);
           });
-          vm.loaded=true
+          vm.loaded = true;
           vm.$q.loading.hide();
         })
-      
+
         .catch(err => {
           this.errorText = err.message;
         });
