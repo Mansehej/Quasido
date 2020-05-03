@@ -43,34 +43,17 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="pasteAlert">
-      <q-card>
-        <q-card-section>
-          <div class="text-h6 text-warning">Warning</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">Pasting in the editor is not allowed.</q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat label="OK" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
     <writer-component
       v-if="loaded==true"
       ref="writer"
-      :enablePaste="this.enablePaste"
+      :enablePaste = true
       :initialContent="this.initialContent"
       :isReadOnly="this.isSubmitted"
-      @paste="pasteEvent()"
     />
   </div>
 </template>
 
 <script>
-let COLLEGE_NAME = "msit";
-
 import Store from "../store/store.js";
 import { firebaseApp, firebaseDb } from "boot/firebase";
 import * as firebase from "firebase/app";
@@ -88,7 +71,8 @@ export default {
   data() {
     return {
       loaded: false,
-      userTypeId: "",
+      userTypeId: "t",
+      teacherDetails: {},
       enablePaste: true,
       assignmentDetails: {},
       pasteAlert: false,
@@ -109,12 +93,7 @@ export default {
 
   async created() {
     await this.checkCorrectUser();
-    this.setTeacherStore();
     this.loadContentAndStatus();
-  },
-
-  async mounted() {
-    if (this.loaded == true) await this.loadContent();
   },
 
   methods: {
@@ -132,32 +111,8 @@ export default {
             console.log(err);
           });
       } else {
-        await this.setUserTypeIdAndPaste();
-        this.studentDetails = await appStore.getValue("userDetails");
+        this.teacherDetails = await appStore.getValue("userDetails");
       }
-    },
-
-    getAssignmentInfo() {
-      this.teacherAssignmentStore
-        .get()
-        .then(doc => {
-          this.assignmentDetails = doc.data();
-          console.log(doc);
-          this.setClassroomStore();
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-
-    pasteEvent() {
-      this.pasteAlert = true;
-    },
-
-    setUserTypeIdAndPaste() {
-      this.userTypeId = "t";
-      this.enablePaste = true;
-      return;
     },
 
     viewSubmissions() {
@@ -170,44 +125,37 @@ export default {
 
     loadContentAndStatus() {
       let vm = this;
-      this.teacherAssignmentStore.get().then(function(doc) {
-        if (doc.exists) {
-          if (doc.data().status == "submitted") {
-            console.log("Is submitted");
-            vm.isSubmitted = true;
+      firebaseDb
+        .collection("assignment")
+        .doc(this.assignmentId)
+        .get()
+        .then(function(doc) {
+          if (doc.exists) {
+            if (doc.data().status == "submitted") {
+              console.log("Is submitted");
+              vm.isSubmitted = true;
+            }
+            if (doc.data().question) {
+              vm.initialContent = doc.data().question;
+            } else {
+              vm.initialContent = {
+                type: "doc",
+                content: [
+                  {
+                    type: "paragraph"
+                  }
+                ]
+              };
+            }
+            console.log(vm.initialContent);
+          } else {
+            console.log("Invalid ID");
+            // Redirect to assignment list page
           }
-          vm.initialContent = doc.data().content;
-          console.log(vm.initialContent);
-        } else {
-          vm.initialContent = {
-            type: "doc",
-            content: [
-              {
-                type: "paragraph"
-              }
-            ]
-          };
-        }
-        vm.loaded = true;
+          vm.loaded = true;
 
-        console.log("loaded");
-      });
-    },
-
-    async loadContent() {
-      console.log("loading content");
-      this.clearEditorContent();
-      let content = this.teacherAssignmentStore.get().then(function(doc) {
-        if (doc.exists) {
-          console.log("exists");
-          console.log("status" + doc.data().content);
-          this.setEditorContent(doc.data().status);
-          console.log("Setting " + doc.data().content);
-        } else {
-          console.log("deosn't");
-          this.setEditorContent("Hello");
-        }
-      });
+          console.log("loaded");
+        });
     },
 
     clearEditorContent() {
@@ -218,69 +166,21 @@ export default {
       this.$refs.writer.setContent(content);
     },
 
-    setTeacherStore() {
-      this.teacherAssignmentStore = firebaseDb
-        .collection(COLLEGE_NAME)
-        .doc("teachers")
-        .collection(this.username)
-        .doc("assignments")
-        .collection("list")
-        .doc(this.assignmentId);
-
-      this.getAssignmentInfo();
-
-      // this.assignmentStore = firebaseDb
-      //   .collection(COLLEGE_NAME)
-      //   .doc("assignments")
-      //   .collection(this.assignmentId)
-      //   .doc(this.username);
-    },
-
-    setClassroomStore() {
-      console.log(this.assignmentDetails);
-
-      this.classroomAssignmentStore = firebaseDb
-        .collection(COLLEGE_NAME)
-        .doc("classrooms")
-        .collection(this.assignmentDetails.course)
-        .doc(this.assignmentDetails.batch)
-        .collection("shift_" + this.assignmentDetails.shift)
-        .doc("semester_" + this.assignmentDetails.semester)
-        .collection("assignments");
-    },
-
     async submitAssignment() {
       this.saveAssignment("submitted");
-
-      let setObj = {
-        due: this.assignmentDetails.due,
-        name: this.assignmentDetails.name,
-        subject: this.assignmentDetails.subject,
-        content: this.getEditorContent(),
-        submissions: []
-      };
-
-      this.classroomAssignmentStore
-        .doc(this.assignmentId)
-        .set(setObj)
-        .then(function() {
-          console.log("Document successfully saved!");
-        })
-        .catch(function(error) {
-          console.error("Error writing document: ", error);
-        });
-
-      this.$router.push("/t/" + this.username).catch(err => {
+       this.$router.push("/t/" + this.username).catch(err => {
         console.log(err);
       });
     },
 
     saveAssignment(status = "draft") {
-      this.teacherAssignmentStore
+       firebaseDb
+        .collection("assignment")
+        .doc(this.assignmentId)
         .update({
-          content: this.getEditorContent(),
+          question: this.getEditorContent(),
           status: status,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          created: firebase.firestore.FieldValue.serverTimestamp()
         })
         .then(function() {
           console.log(status + " writing succesfull");
