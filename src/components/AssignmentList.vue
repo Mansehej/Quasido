@@ -21,12 +21,14 @@
               v-model="newAssignment.branch"
               :options="newAssignmentOptions.branchList"
               label="Branch"
+              multiple
             />
             <q-select
               outlined
               v-model="newAssignment.batch"
               :options="newAssignmentOptions.batchList"
               label="Batch"
+              multiple
             />
             <q-select
               outlined
@@ -52,6 +54,7 @@
             v-model="newAssignment.due"
             title="Due Date"
             subtitle="Please don't give a short one :)"
+            :options="DateOptions"
           />
         </q-card-section>
 
@@ -108,7 +111,7 @@ let appStore = new Store("app");
 
 import { firebaseDb } from "boot/firebase";
 import * as firebase from "firebase";
-
+import { date } from "quasar";
 export default {
   props: {
     userType: String,
@@ -121,8 +124,8 @@ export default {
       duePrompt: false,
       newAssignment: {
         course: "",
-        branch: "",
-        batch: "",
+        branch: [],
+        batch: [],
         subject: "",
         due: "",
         title: ""
@@ -193,8 +196,21 @@ export default {
         .catch(error => {
           console.log(error);
         });
-
     },
+    currentDateGenerator() {
+      var x = new Date();
+      var y = x.getFullYear().toString();
+      var m = (x.getMonth() + 1).toString();
+      var d = x.getDate().toString();
+      d.length == 1 && (d = "0" + d);
+      m.length == 1 && (m = "0" + m);
+      var yyyymmdd = y + "/" + m + "/" + d;
+      return yyyymmdd;
+    },
+    DateOptions(date) {
+      //  console.log(formattedString);
+      return date >= this.currentDateGenerator();
+    }
   }
 };
 </script>

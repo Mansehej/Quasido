@@ -11,3 +11,7 @@
 - Allow percent of plagarism (10-25)
 - Allot marks by teacher
 - Studewt wise list of evaluated, assignments suybmitted wtc (report card type, exported as csv)
+
+
+
+- Login login bug due to no route check on auth/:userType it is taking auth/login as usertype 
