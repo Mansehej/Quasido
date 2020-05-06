@@ -11,7 +11,7 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
-        <q-toolbar-title>Quasar App</q-toolbar-title>
+        <q-toolbar-title>Quasido</q-toolbar-title>
 
         <q-btn @click="authChange">Sign Out</q-btn>
       </q-toolbar>
@@ -21,7 +21,7 @@
       <!-- <q-list>
         <q-item-label header class="text-grey-8">Essential Links</q-item-label>
         <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
-      </q-list> -->
+      </q-list>-->
     </q-drawer>
 
     <q-page-container>

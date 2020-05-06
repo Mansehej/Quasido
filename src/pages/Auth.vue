@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex flex-center">
-    <q-card style="width:50hh">
+    <q-card style="min-width:18vw">
       <q-card-section>
         <div class="text-h6 text-capitalize text-center">{{userType}} Login</div>
       </q-card-section>
@@ -28,7 +28,7 @@
 <script>
 export default {
   data() {
-    let otherType
+    let otherType;
     if (this.userType == "student") {
       otherType = "teacher";
     } else {
@@ -58,6 +58,9 @@ export default {
         console.log(err);
       });
     }
+  },
+  mounted() {
+    console.log(this.$props.userType);
   }
 };
 </script>
