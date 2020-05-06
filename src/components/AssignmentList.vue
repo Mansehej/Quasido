@@ -15,34 +15,35 @@
               v-model="newAssignment.course"
               :options="newAssignmentOptions.courseList"
               label="Course"
+              required
             />
             <q-select
               outlined
               v-model="newAssignment.branch"
               :options="newAssignmentOptions.branchList"
               label="Branch"
-              multiple
+              required
             />
             <q-select
               outlined
               v-model="newAssignment.batch"
               :options="newAssignmentOptions.batchList"
               label="Batch"
-              multiple
+              required
             />
             <q-select
               outlined
               v-model="newAssignment.subject"
               :options="newAssignmentOptions.subjectList"
               label="Subject"
+              required
             />
           </div>
         </q-card-section>
 
         <q-separator />
-
         <q-card-actions align="right">
-          <q-btn v-close-popup flat color="primary" label="Next" @click="duePrompt = true" />
+          <q-btn v-close-popup flat color="primary" label="Next" @click="duePrompt = true " />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -123,12 +124,12 @@ export default {
       prompt: false,
       duePrompt: false,
       newAssignment: {
-        course: "",
-        branch: [],
-        batch: [],
-        subject: "",
-        due: "",
-        title: ""
+        course: null,
+        branch: null,
+        batch: null,
+        subject: null,
+        due: null,
+        title: null
       },
       newAssignmentOptions: {
         courseList: ["BTech"],
@@ -155,49 +156,91 @@ export default {
         });
       }
     },
+    async testFx() {},
     async createAssignment() {
-      Object.keys(this.newAssignment).forEach(property => {
+      //fix this function
+      let newAssignment = Object.keys(this.newAssignment).forEach(property => {
         if (typeof this.newAssignment[property] == "string") {
+          console.log(this.newAssignment[property]);
           this.newAssignment[property] = this.newAssignment[
             property
           ].toLowerCase();
+          console.log(this.newAssignment[property]);
         }
       });
-
+      
+      console.log(this.newAssignment);
       let vm = this;
       let date = new Date(this.newAssignment.due);
       date.setHours(23);
       date.setMinutes(59);
       date.setSeconds(59);
       this.newAssignment.due = firebase.firestore.Timestamp.fromDate(date);
+      console.log(this.newAssignment.due);
       let teacherId = await appStore.getValue("userId");
 
-      let batchName =
-        this.newAssignment.batch + "-" + this.newAssignment.branch;
+      let batchName = (
+        this.newAssignment.batch +
+        "-" +
+        this.newAssignment.branch
+      ).toLowerCase();
 
-      // Get object of batch and subject and set in below object
+      const getBatchId = new Promise((resolve, reject) =>
+        firebaseDb
+          .collection("batch")
+          .where("name", "==", batchName)
+          .get()
+          .then(snapshot => {
+            if (snapshot.empty) {
+            }
+            snapshot.forEach(doc => {
+              resolve(batchId);
+            });
+          })
+      );
 
-      firebaseDb
-        .collection("assignment")
-        .add({
-          batch_id: batch.id,
-          batch_name: batchName,
-          created: firebase.firestore.FieldValue.serverTimestamp(),
-          due: this.newAssignment.due,
-          status: "draft",
-          subject: subject.id,
-          subject_name: this.newAssignment.subject,
-          title: this.newAssignment.title,
-          teacher_id: teacherId
-        })
-        .then(assignment => {
-          vm.openAssignment(assignment.id);
-        })
-        .catch(error => {
-          console.log(error);
-        });
+      const getSubjectId = new Promise((resolve, reject) => {
+        firebaseDb
+          .collection("subject")
+          .where("name", "==", this.newAssignment.subject)
+          .get()
+          .then(snapshot => {
+            if (snapshot.empty) {
+              reject("ERROR");
+            }
+            snapshot.forEach(doc => {
+              resolve(subjectId);
+            });
+          });
+      });
+
+      Promise.all([getBatchId, getSubjectId]).then(values => {
+        firebaseDb
+          .collection("assignment")
+          .add({
+            batch_id: values[0],
+            batch_name: batchName,
+            created: firebase.firestore.FieldValue.serverTimestamp(),
+            due: this.newAssignment.due,
+            status: "draft",
+            subject: values[0],
+            subject_name: this.newAssignment.subject,
+            title: this.newAssignment.title,
+            teacher_id: teacherId
+          })
+          .then(assignment => {
+            vm.openAssignment(assignment.id);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      });
     },
-    currentDateGenerator() {
+    EmptyFieldsCheck() {
+      //enter field check code here
+    },
+
+    CurrentDateGenerator() {
       var x = new Date();
       var y = x.getFullYear().toString();
       var m = (x.getMonth() + 1).toString();
@@ -208,8 +251,7 @@ export default {
       return yyyymmdd;
     },
     DateOptions(date) {
-      //  console.log(formattedString);
-      return date >= this.currentDateGenerator();
+      return date >= this.CurrentDateGenerator();
     }
   }
 };
