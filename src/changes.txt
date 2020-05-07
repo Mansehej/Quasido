@@ -14,4 +14,5 @@
 
 
 
-- Login login bug due to no route check on auth/:userType it is taking auth/login as usertype 
+
+

@@ -46,7 +46,7 @@
     <writer-component
       v-if="loaded==true"
       ref="writer"
-      :enablePaste = true
+      :enablePaste="true"
       :initialContent="this.initialContent"
       :isReadOnly="this.isSubmitted"
     />
@@ -168,13 +168,14 @@ export default {
 
     async submitAssignment() {
       this.saveAssignment("submitted");
-       this.$router.push("/t/" + this.username).catch(err => {
+      this.$router.push("/t/" + this.username).catch(err => {
         console.log(err);
       });
     },
 
     saveAssignment(status = "draft") {
-       firebaseDb
+      let vm = this;
+      firebaseDb
         .collection("assignment")
         .doc(this.assignmentId)
         .update({
@@ -184,6 +185,9 @@ export default {
         })
         .then(function() {
           console.log(status + " writing succesfull");
+          vm.$router.push("/t/" + vm.username).catch(err => {
+            console.log(err);
+          });
         })
         .catch(function(error) {
           console.error("Error writing document: ", error);
