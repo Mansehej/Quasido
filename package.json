@@ -10,6 +10,9 @@
   "scripts": {
     "start": "quasar dev",
     "local": "quasar dev",
+    "build": "quasar build",
+    "serve": "quasar build && firebase serve",
+    "deploy": "quasar build && firebase deploy",
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
