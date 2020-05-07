@@ -1,0 +1,7 @@
+//@ashx404
+
+- Login login bug due to no route check on auth/:userType it is taking auth/login as usertype
+- Discuss multiple batch select with mansehej as  i am not sure it will be used that often.
+- Editor should show the cursor at the end of the assignment or at the last place it was left when opened a draft
+- Refactor by using components where ever possible. Possible in : [AssignmentList] 
+- Changed TeacherAssignments to divide assignments into submitted and drafts

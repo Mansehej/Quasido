@@ -72,37 +72,80 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-
-    <q-list bordered>
-      <q-item
-        v-for="assignment in assignments"
-        :key="assignment.id"
-        class="q-my-sm"
-        clickable
-        v-ripple
-      >
-        <q-item-section @click="openAssignment(assignment.id)">
-          <q-item-label class="text-capitalize">{{ assignment.title }}</q-item-label>
-          <q-item-label caption lines="1" class="text-capitalize">{{ assignment.subject_name}}</q-item-label>
-          <q-item-label v-if="!assignment.submitted" caption lines="1" class="text-negative">
-            Due Date:
-            {{assignment.due.toDate().toDateString()}}
-          </q-item-label>
-          <q-item-label
-            v-if="assignment.submitted"
-            caption
-            lines="1"
-            class="text-positive"
-          >Submitted</q-item-label>
-          <q-item-label
-            v-if="userType=='t'"
-            caption
-            lines="1"
-            class="text-positive text-capitalize"
-          >{{assignment.batch.toUpperCase()}} {{assignment.shift}} | {{assignment.year}} Batch</q-item-label>
-        </q-item-section>
-      </q-item>
-    </q-list>
+    <q-tabs v-model="tab" align="justify" no-caps class="bg-light-blue-3 text-white shadow-2">
+      <q-tab name="submitted" label="Submitted" />
+      <q-tab name="draft" label="Drafts" />
+    </q-tabs>
+    <q-separator />
+    <q-card>
+      <q-tab-panels v-model="tab" animated>
+        <q-tab-panel name="submitted">
+          <q-list bordered>
+            <q-item
+              v-for="assignment in submittedAssignments"
+              :key="assignment.id"
+              class="q-my-sm"
+              clickable
+              v-ripple
+            >
+              <q-item-section @click="openAssignment(assignment.id)">
+                <q-item-label class="text-capitalize">{{ assignment.title }}</q-item-label>
+                <q-item-label caption lines="1" class="text-capitalize">{{ assignment.subject_name}}</q-item-label>
+                <q-item-label v-if="!assignment.submitted" caption lines="1" class="text-negative">
+                  Due Date:
+                  {{assignment.due.toDate().toDateString()}}
+                </q-item-label>
+                <q-item-label
+                  v-if="assignment.submitted"
+                  caption
+                  lines="1"
+                  class="text-positive"
+                >Submitted</q-item-label>
+                <q-item-label
+                  v-if="userType=='t'"
+                  caption
+                  lines="1"
+                  class="text-positive text-capitalize"
+                >{{assignment.batch.toUpperCase()}} {{assignment.shift}} | {{assignment.year}} Batch</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-tab-panel>
+        <q-tab-panel name="draft">
+          <q-list bordered>
+            <p v-if="draftAssignments.length==0">There's nothing here</p>
+            <q-item
+              v-for="assignment in draftAssignments"
+              :key="assignment.id"
+              class="q-my-sm"
+              clickable
+              v-ripple
+            >
+              <q-item-section @click="openAssignment(assignment.id)">
+                <q-item-label class="text-capitalize">{{ assignment.title }}</q-item-label>
+                <q-item-label caption lines="1" class="text-capitalize">{{ assignment.subject_name}}</q-item-label>
+                <q-item-label v-if="!assignment.submitted" caption lines="1" class="text-negative">
+                  Due Date:
+                  {{assignment.due.toDate().toDateString()}}
+                </q-item-label>
+                <q-item-label
+                  v-if="assignment.submitted"
+                  caption
+                  lines="1"
+                  class="text-positive"
+                >Submitted</q-item-label>
+                <q-item-label
+                  v-if="userType=='t'"
+                  caption
+                  lines="1"
+                  class="text-positive text-capitalize"
+                >{{assignment.batch.toUpperCase()}} {{assignment.shift}} | {{assignment.year}} Batch</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-tab-panel>
+      </q-tab-panels>
+    </q-card>
   </div>
 </template>
 
@@ -116,11 +159,13 @@ import { date } from "quasar";
 export default {
   props: {
     userType: String,
-    assignments: Array,
-    username: String
+    username: String,
+    submittedAssignments: Array,
+    draftAssignments: Array
   },
   data() {
     return {
+      tab: "submitted",
       prompt: false,
       duePrompt: false,
       newAssignment: {
@@ -136,7 +181,7 @@ export default {
         branchList: ["CSE-1", "CSE-2", "IT-1", "IT-2", "CSE-E", "IT-E"],
         batchList: ["2021"],
         subjectList: [
-          "Artifcial Intelligence",
+          "Artificial Intelligence",
           "Compiler Design",
           "Web Engineering",
           "Operating Systems"
@@ -158,18 +203,17 @@ export default {
     },
     async testFx() {},
     async createAssignment() {
-      //fix this function
-      let newAssignment = Object.keys(this.newAssignment).forEach(property => {
+      this.$q.loading.show();
+      Object.keys(this.newAssignment).forEach(property => {
         if (typeof this.newAssignment[property] == "string") {
-          console.log(this.newAssignment[property]);
           this.newAssignment[property] = this.newAssignment[
             property
           ].toLowerCase();
-          console.log(this.newAssignment[property]);
         }
       });
-      
+
       console.log(this.newAssignment);
+
       let vm = this;
       let date = new Date(this.newAssignment.due);
       date.setHours(23);
@@ -178,13 +222,14 @@ export default {
       this.newAssignment.due = firebase.firestore.Timestamp.fromDate(date);
       console.log(this.newAssignment.due);
       let teacherId = await appStore.getValue("userId");
-
-      let batchName = (
-        this.newAssignment.batch +
-        "-" +
-        this.newAssignment.branch
-      ).toLowerCase();
-
+      let batchName =
+        this.newAssignment.batch + "-" + this.newAssignment.branch;
+      console.log(
+        this.newAssignment.due,
+        this.newAssignment.subject,
+        this.newAssignment.title,
+        batchName
+      );
       const getBatchId = new Promise((resolve, reject) =>
         firebaseDb
           .collection("batch")
@@ -192,9 +237,10 @@ export default {
           .get()
           .then(snapshot => {
             if (snapshot.empty) {
+              reject("UNKNOWN BATCH");
             }
             snapshot.forEach(doc => {
-              resolve(batchId);
+              resolve(doc.id);
             });
           })
       );
@@ -206,15 +252,16 @@ export default {
           .get()
           .then(snapshot => {
             if (snapshot.empty) {
-              reject("ERROR");
+              reject("UNKNOWN SUBJECT");
             }
             snapshot.forEach(doc => {
-              resolve(subjectId);
+              resolve(doc.id);
             });
           });
       });
 
       Promise.all([getBatchId, getSubjectId]).then(values => {
+        console.log(values);
         firebaseDb
           .collection("assignment")
           .add({
@@ -229,6 +276,7 @@ export default {
             teacher_id: teacherId
           })
           .then(assignment => {
+            this.$q.loading.hide();
             vm.openAssignment(assignment.id);
           })
           .catch(error => {

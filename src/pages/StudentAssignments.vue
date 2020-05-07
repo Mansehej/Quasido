@@ -2,7 +2,8 @@
   <q-page class="flex flex-center">
     <assignment-list
       v-if="loaded==true"
-      :assignments="assignments"
+      :submittedAssignments="submittedAssignments"
+      :draftAssignments="draftAssignments"
       :userType="userTypeId"
       :username="username"
     />
@@ -28,7 +29,8 @@ export default {
     return {
       assigmentPrompt: false,
       loaded: false,
-      assignments: [],
+      submittedAssignments: [],
+      draftAssignments: [],
       userTypeId: "s",
       errorText: ""
     };
@@ -58,7 +60,7 @@ export default {
     },
     async getAssignmentList() {
       let studentDetails = await appStore.getValue("userDetails");
-      let studentId = await appStore.getValue("userId")
+      let studentId = await appStore.getValue("userId");
       await firebaseDb
         .collection("assignment")
         .where("batch_id", "==", studentDetails.batch_id)
@@ -76,7 +78,11 @@ export default {
               assignmentObj["submitted"] = true;
             }
             assignmentObj["id"] = assignment.id;
-            this.assignments.push(assignmentObj);
+            if (assignmentObj["status"] == "submitted")
+              this.submittedAssignments.push(assignmentObj);
+            else {
+              this.draftAssignments.push(assignmentObj);
+            }
           });
           this.loaded = true;
           this.$q.loading.hide();

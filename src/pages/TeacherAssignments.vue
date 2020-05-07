@@ -2,7 +2,8 @@
   <q-page class="flex flex-center">
     <assignment-list
       v-if="loaded==true"
-      :assignments="assignments"
+      :submittedAssignments="submittedAssignments"
+      :draftAssignments="draftAssignments"
       :userType="userTypeId"
       :username="username"
     />
@@ -26,7 +27,8 @@ export default {
     return {
       assigmentPrompt: false,
       loaded: false,
-      assignments: [],
+      submittedAssignments: [],
+      draftAssignments: [],
       userTypeId: "t",
       errorText: ""
     };
@@ -67,10 +69,14 @@ export default {
             let assignmentObj = assignment.data();
             let batchInfo = assignmentObj.batch_name.split("-");
             console.log(batchInfo);
-            assignmentObj["batch"] = batchInfo[1] + "-" + batchInfo[2] ;
-            assignmentObj["year"] = batchInfo[0]
+            assignmentObj["batch"] = batchInfo[1] + "-" + batchInfo[2];
+            assignmentObj["year"] = batchInfo[0];
             assignmentObj["id"] = assignment.id;
-            vm.assignments.push(assignmentObj);
+            if (assignment.data().status == "submitted") {
+              vm.submittedAssignments.push(assignmentObj);
+            } else {
+              vm.draftAssignments.push(assignmentObj);
+            }
           });
           vm.loaded = true;
           vm.$q.loading.hide();
