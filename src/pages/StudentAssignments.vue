@@ -70,10 +70,11 @@ export default {
         .get()
         .then(async assignmentList => {
           if (assignmentList.empty) {
-            return;
+            console.log("ERRRR");
           }
           assignmentList.forEach(async assignment => {
             let assignmentObj = assignment.data();
+            console.log(assignmentObj);
             if (assignmentObj.submissions.includes(studentId)) {
               assignmentObj["submitted"] = true;
             }
