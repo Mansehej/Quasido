@@ -30,6 +30,12 @@ npm install
 Navigate to the root of the repository and run the quasar project using:
 
 ```
+npm start
+```
+
+OR
+
+```
 npm run local
 ```
 
