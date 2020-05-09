@@ -41,8 +41,26 @@ export default {
     await this.checkCorrectUser();
     // Initialise store and get list of all scripts
     await this.getAssignmentList();
+    await this.test();
   },
   methods: {
+    async test() {
+      let studentDetails = await appStore.getValue("userDetails");
+      let studentId = await appStore.getValue("userId");
+      await firebaseDb
+        .collection("assignment")
+        .where("batch_id", "==", studentDetails.batch_id)
+        .where("due", ">=", firebase.firestore.Timestamp.now())
+        .where("status", "==", "submitted")
+        .orderBy("due")
+        .get()
+        .then(list => {
+          list.forEach(el => {
+            console.log(el.id);
+          });
+          this.$q.loading.hide();
+        });
+    },
     async checkCorrectUser() {
       let signedInUser = await appStore.getValue("username");
       if (!signedInUser) {
@@ -72,6 +90,7 @@ export default {
           if (assignmentList.empty) {
             console.log("ERRRR");
           }
+          console.log(assignmentList);
           assignmentList.forEach(async assignment => {
             let assignmentObj = assignment.data();
             console.log(assignmentObj);

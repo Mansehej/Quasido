@@ -5,3 +5,5 @@
 - Editor should show the cursor at the end of the assignment or at the last place it was left when opened a draft
 - Refactor by using components where ever possible. Possible in : [AssignmentList] 
 - Changed TeacherAssignments to divide assignments into submitted and drafts
+- Should not allow to edit submitted assignments
+- Fix the submit assignments by students some writer issue

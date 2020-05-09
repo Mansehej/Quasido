@@ -210,7 +210,7 @@ export default {
     },
 
     async submitAssignment() {
-      this.saveAssignment("submitted");
+      await this.saveAssignment("submitted");
 
       firebaseDb
         .collection("assignment")
@@ -230,14 +230,15 @@ export default {
       });
     },
 
-    saveAssignment(status = "draft", cheated = false) {
+    async saveAssignment(status = "draft", cheated = false) {
       let vm = this;
-
+      let studentDetails = await appStore.getValue("userDetails");
+      console.log(this.responseId);
       if (!this.responseId) {
         this.setAssignment();
         return;
       }
-
+      console.log(this.getEditorContent());
       if (cheated) {
         firebaseDb
           .collection("assignment_response")
@@ -250,8 +251,16 @@ export default {
           })
           .then(function() {
             console.log("Update " + status + " succesfull");
+            console.log(vm.$props.username);
+            if (status == "draft") {
+              console.log("SUBMITTING");
+              vm.$router.push("/s/" + studentDetails.roll).catch(err => {
+                console.log(err);
+              });
+            }
           })
           .catch(error => {
+            console.log(error);
             this.setAssignment();
           });
       } else {
@@ -265,8 +274,16 @@ export default {
           })
           .then(function() {
             console.log("Update " + status + " succesfull");
+            console.log(vm.$props.username);
+            if (status == "draft") {
+              console.log("SUBMITTING");
+              vm.$router.push("/s/" + studentDetails.roll).catch(err => {
+                console.log(err);
+              });
+            }
           })
           .catch(error => {
+            console.log(error);
             this.setAssignment();
           });
       }
@@ -281,14 +298,18 @@ export default {
           status: status,
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           student_id: this.studentId,
-          student_name:this.studentDetails.name ,
-          student_roll:this.studentDetails.roll,
+          student_name: this.studentDetails.name,
+          student_roll: this.studentDetails.roll,
           assignment_id: this.assignmentId,
           cheated: cheated
         })
         .then(function(doc) {
           vm.responseId = doc.id;
           console.log(status + " writing succesfull");
+          if (status == "draft") {
+            console.log("SUBMITTING");
+            vm.$router.push("/s/" + vm.username);
+          }
         })
         .catch(function(error) {
           console.error("Error writing document: ", error);

@@ -73,7 +73,8 @@
       </q-card>
     </q-dialog>
     <q-tabs v-model="tab" align="justify" no-caps class="bg-light-blue-3 text-white shadow-2">
-      <q-tab name="submitted" label="Submitted" />
+      <q-tab v-if="userType=='s'" name="todo" label="To-do" />
+      <q-tab v-if="userType=='t'" name="submitted" label="Submitted" />
       <q-tab name="draft" label="Drafts" />
     </q-tabs>
     <q-separator />
@@ -176,6 +177,7 @@ export default {
         due: null,
         title: null
       },
+      branchBatchMap: {},
       newAssignmentOptions: {
         courseList: ["BTech"],
         branchList: ["CSE-1", "CSE-2", "IT-1", "IT-2", "CSE-E", "IT-E"],
@@ -190,6 +192,25 @@ export default {
     };
   },
   methods: {
+    async fetchInitialOptions() {
+      const getBatches = new Promise((resolve, reject) => {
+       firebaseDb
+          .collection("batch")
+          .get().then(batches=>{
+            if(batchList.empty)
+            {
+              reject("error")
+            }
+             batches.forEach(batch=>{
+               currentBatch = batch.data()
+               currentBatch.name.substr()
+             })
+          })
+
+      });
+      const getCourses = new Promise((resolve, reject) => {});
+      const getSubjects = new Promise((resolve, reject) => {});
+    },
     openAssignment(id) {
       if (this.userType == "s") {
         this.$router.push("/s/" + this.username + "/" + id).catch(err => {
@@ -273,7 +294,8 @@ export default {
             subject: values[0],
             subject_name: this.newAssignment.subject,
             title: this.newAssignment.title,
-            teacher_id: teacherId
+            teacher_id: teacherId,
+            submissions: []
           })
           .then(assignment => {
             this.$q.loading.hide();
